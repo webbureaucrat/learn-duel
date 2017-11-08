@@ -5,7 +5,7 @@ scalaVersion  := "2.12.4"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 
-libraryDependencies += "junit" % "junit" % "4.8" % "test"
+libraryDependencies += "junit" % "junit" % "4.12" % "test"
 
 //*******************************************************************************//
 //Libraries that we will use in later lectures compatible with this scala version
