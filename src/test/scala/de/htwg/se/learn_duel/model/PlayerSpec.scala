@@ -1,6 +1,6 @@
 package de.htwg.se.learn_duel.model
 
-import de.htwg.se.learn_duel.model.impl.Player
+import de.htwg.se.learn_duel.model.impl.{ Player => PlayerImpl}
 import org.junit.runner.RunWith
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner
@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 class PlayerSpec extends WordSpec with Matchers {
     "A Player" when {
         "new" should {
-            val player = Player("Your Name")
+            val player = PlayerImpl("Your Name")
             "have a name" in {
                 player.name should be("Your Name")
             }
