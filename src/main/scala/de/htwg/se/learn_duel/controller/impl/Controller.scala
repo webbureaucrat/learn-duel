@@ -4,7 +4,7 @@ import de.htwg.se.learn_duel.controller.{Controller => ControllerTrait}
 import de.htwg.se.learn_duel.model.impl.Player
 import de.htwg.se.learn_duel.model.impl.Game
 
-class Controller(gameState: Game) private extends ControllerTrait {
+class Controller private (gameState: Game) extends ControllerTrait {
     override def nextPlayerName(): String = List(Player.baseName, gameState.playerCount + 1).mkString(" ")
 
     override def getCurrentPlayers(): List[String] = {

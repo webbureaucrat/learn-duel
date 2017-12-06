@@ -6,7 +6,7 @@ import de.htwg.se.learn_duel.view.impl.{GUI, TUI}
 
 object LearnDuel {
     def main(args: Array[String]): Unit = {
-        val gameState = Game
+        val gameState = Game()
         val controller = Controller.create(gameState)
         val tui = TUI.create(controller)
         val gui = GUI.create(controller)
