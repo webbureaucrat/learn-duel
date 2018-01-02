@@ -1,13 +1,17 @@
 package de.htwg.se.learn_duel.model.impl
 
-import de.htwg.se.learn_duel.model.{ Player => PlayerTrait }
+import java.security.InvalidParameterException
+
+import de.htwg.se.learn_duel.model.{Player => PlayerTrait}
 
 case class Player(name: String) extends PlayerTrait {
     if  (name.isEmpty) {
-        // FIXME error: name can't be empty
+        throw new InvalidParameterException("Player name cannot be empty")
+    } else if (!name.matches("\\S+")) {
+        throw new InvalidParameterException("Player name may not contain whitespaces")
     }
 
-    override def toString:String = name
+    override def toString: String = name
 }
 
 object Player {
