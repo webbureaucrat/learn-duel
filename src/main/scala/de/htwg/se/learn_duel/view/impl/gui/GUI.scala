@@ -49,15 +49,10 @@ class GUI private (controller: Controller, latch: CountDownLatch) extends JFXApp
                         case Some(gameState) => gameState.helpText
                         case None => "No help available."
                     }
-                    val dlg = new Dialog[Unit] {
-                        title = "Learn Duel Help"
-                        contentText = helpText
-                        dialogPane.value.getButtonTypes.add(ButtonType.OK)
-                        initModality(Modality.None)
-                    }
-
+                    val dlg = new InfoPopup("Learn Duel Help", helpText)
                     dlg.show
                 }
+                case _ =>
             }
         }
     }

@@ -40,6 +40,7 @@ class TUI private (controller: Controller) extends UI with Observer {
                 }
                 println(helpText)
             }
+            case _ =>
         }
     }
 
