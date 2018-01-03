@@ -5,8 +5,8 @@ import java.util.concurrent.CountDownLatch
 import de.htwg.se.learn_duel.Observer
 import de.htwg.se.learn_duel.controller.Controller
 import de.htwg.se.learn_duel.model.{Player, Question}
-import de.htwg.se.learn_duel.view.impl.TUI
-import de.htwg.se.learn_duel.view.impl.gui.GUI
+import de.htwg.se.learn_duel.view.impl.{ TUI => TUIImpl }
+import de.htwg.se.learn_duel.view.impl.gui.{ GUI => GUIImpl }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -18,15 +18,15 @@ trait UI extends Observer {
 }
 
 object TUI {
-    def create(controller: Controller): TUI = {
-        new TUI(controller)
+    def create(controller: Controller): TUIImpl = {
+        new TUIImpl(controller)
     }
 }
 
 object GUI {
     def create(controller: Controller): Unit = {
         val latch = new CountDownLatch(1)
-        val gui = new GUI(controller, latch)
+        val gui = new GUIImpl(controller, latch)
 
         // run GUI on its own thread
         Future {

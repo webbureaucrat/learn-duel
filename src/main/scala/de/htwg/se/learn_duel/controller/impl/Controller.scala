@@ -6,7 +6,6 @@ import de.htwg.se.learn_duel.controller.impl.exceptions._
 import de.htwg.se.learn_duel.controller.{Controller => ControllerTrait}
 import de.htwg.se.learn_duel.model.{Game, Player, Question}
 import de.htwg.se.learn_duel.{UpdateAction, UpdateData}
-import sun.plugin.dom.exception.InvalidStateException
 
 class Controller(gameState: Game) extends ControllerTrait {
     protected var questionIter: Iterator[Question] = Iterator.empty
@@ -73,7 +72,7 @@ class Controller(gameState: Game) extends ControllerTrait {
     override def onStartGame(): Unit = {
         resetQuestionIterator()
         if (!questionIter.hasNext) {
-            throw new InvalidStateException("Can't start game without questions");
+            throw new IllegalStateException("Can't start game without questions");
         }
 
         showGame()
