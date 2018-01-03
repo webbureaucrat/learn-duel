@@ -1,11 +1,43 @@
 package de.htwg.se.learn_duel.model
 
+import de.htwg.se.learn_duel.model.impl.{Game => GameImpl, Player => PlayerImpl, Question => QuestionImpl}
+import play.api.libs.json.{JsPath, Json, Reads, Writes}
+import play.api.libs.functional.syntax._
+
 trait Game {
-    protected var _players: List[Player] = List()
-    var helpText: String = ""
-    def players: List[Player] = _players
+    var helpText: String
+    var players: List[Player]
+    var questions: List[Question]
+    var currentQuestion: Option[Question]
+    var currentQuestionTime: Option[Int]
 
     def addPlayer(player: Player): Unit
     def removePlayer(player: Player): Unit
     def playerCount(): Int
+
+    def addQuestion(question: Question): Unit
+    def removeQuestion(question: Question): Unit
+    def questionCount(): Int
+}
+
+object Game {
+    val maxPlayerCount = 2
+
+    implicit val gameWrites = new Writes[Game] {
+        def writes(game: Game) = Json.obj(
+            "helpText" -> game.helpText,
+            "players" -> game.players,
+            "questions" -> game.questions,
+            "currentQuestion" -> game.currentQuestion,
+            "currentQuestionTime" -> game.currentQuestionTime
+        )
+    }
+
+    implicit val questionReads: Reads[Game] = (
+            (JsPath \ "helpText").read[String] and
+            (JsPath \ "players").read[List[Player]] and
+            (JsPath \ "questions").read[List[Question]] and
+            (JsPath \ "currentQuestion").readNullable[Question] and
+            (JsPath \ "currentQuestionTime").readNullable[Int]
+        )(GameImpl.apply _)
 }
