@@ -1,88 +1,167 @@
 package de.htwg.se.learn_duel.view.impl
 
-import java.io.{BufferedReader, StringReader}
+import java.io.BufferedReader
+import java.util.{Timer, TimerTask}
 
+import com.typesafe.scalalogging.LazyLogging
 import de.htwg.se.learn_duel.{Observer, UpdateAction, UpdateData}
 import de.htwg.se.learn_duel.controller.{Controller, ControllerException}
+import de.htwg.se.learn_duel.model.{Player, Question}
 import de.htwg.se.learn_duel.view.UI
 
-import scalafx.collections.ObservableBuffer.Update
-
-class TUI private (controller: Controller) extends UI with Observer {
+class TUI (controller: Controller) extends UI with Observer with LazyLogging {
     controller.addObserver(this)
     var stopProcessingInput = false
+    var inMenu = true
+    var inGame = false
     displayMenu
 
+    def displayPlayers(): Unit = {
+        logger.info("Current players: " + controller.getCurrentPlayers.mkString(", "))
+    }
+
     override def displayMenu(): Unit = {
-
-        println("")
-        println("Welcome to Learn Duel")
-        println("Current players: " + controller.getCurrentPlayers.mkString(", "))
-        println("n => new game")
-        println("a [name] => add player")
-        println("r [name] => remove player")
-        println("h => show help")
-        println("q => exit")
-        println("")
+        logger.info("")
+        logger.info("Welcome to Learn Duel")
+        displayPlayers()
+        logger.info("n => new game")
+        logger.info("a [name] => add player")
+        logger.info("r [name] => remove player")
+        logger.info("h => show help")
+        logger.info("q => exit")
+        logger.info("")
     }
 
-    override def displayGame(): Unit = {
-
+    override def displayGame(question: Question, multiplayer: Boolean): Unit = {
+        logger.info(question.text)
+        question.answers.zipWithIndex.foreach {case (ans, i) => {
+            logger.info((i + 1) + "/" + (i + 5) + ": " + ans.text)
+        }}
     }
 
+    override def displayResult(players: List[Player]): Unit = {
+        logger.info("")
+        logger.info("RESULT:")
+        players.foreach(p => {
+            logger.info("Player '" + p.name + "':")
+            logger.info("Points: " + p.points)
+            logger.info("Correct answers:")
+            p.correctAnswers.foreach(q => {
+                logger.info("\t" + q.text)
+            })
+
+            logger.info("Wrong answers:")
+            p.wrongAnswers.foreach(q => {
+                logger.info("\t" + q.text)
+                val correctAnswer = q.answers.find(a => a.id == q.correctAnswer).get
+                logger.info("\tcorrect answer is: " + correctAnswer.text)
+            })
+        })
+
+        val player = players.max[Player]{ case (p1: Player, p2: Player) => {
+            p1.points.compareTo(p2.points)
+        }}
+
+        logger.info("")
+        logger.info("'" + player.name + "' won the game!")
+        logger.info("")
+    }
+
+    // scalastyle:off
     override def update(updateParam: UpdateData): Unit = {
         updateParam.getAction() match {
             case UpdateAction.CLOSE_APPLICATION => stopProcessingInput = true
             case UpdateAction.SHOW_HELP => {
-                val helpText = updateParam.getState() match {
-                    case Some(gameState) => gameState.helpText
-                    case None => "No help available."
-                }
-                println(helpText)
+                logger.info(updateParam.getState().helpText)
+            }
+            case UpdateAction.PLAYER_UPDATE => displayPlayers
+            case UpdateAction.SHOW_GAME => {
+                displayGamePretty(
+                    updateParam.getState().currentQuestion.get,
+                    updateParam.getState().players.length > 1,
+                    updateParam.getState().currentQuestionTime.get
+                )
+                inMenu = false;
+                inGame = true;
+            }
+            case UpdateAction.UPDATE_TIMER => {
+                displayGamePretty(
+                    updateParam.getState().currentQuestion.get,
+                    updateParam.getState().players.length > 1,
+                    updateParam.getState().currentQuestionTime.get
+                )
+            }
+            case UpdateAction.SHOW_RESULT => {
+                displayResult(updateParam.getState().players)
             }
             case _ =>
         }
     }
 
-    // scalastyle:off
     def processInput(input: BufferedReader): Unit = {
-        val playerPattern = """(?:a|r)(?:\s+(.*))?""".r
-
         while (!stopProcessingInput) {
             if (input.ready()) {
                 val line = input.readLine()
-
-                // don't match input if we close the application anyway
-                try {
-                    line match {
-                        case "q" => {
-                            controller.onClose
-                        }
-                        case "n" =>
-                        case playerPattern(name) if line.startsWith("a") => controller.addPlayer(Option(name))
-                        case playerPattern(name) if line.startsWith("r") => if (name != null) {
-                            controller.removePlayer(name)
-                        }
-                        case "h" => controller.onHelp
-                        case _ => println("Unknown command")
-                    }
-                } catch {
-                    case e: ControllerException => println(e.getMessage)
+                if (inMenu){
+                    processMenuInput(line)
+                } else if (inGame) {
+                    processGameInput(line)
+                } else {
+                    processResultInput(line)
                 }
-
-                // check if the application should be closed after parsing input
-                // if yes, don't repeat the menu
-                if (!stopProcessingInput) {
-                    displayMenu
-                }
+            } else {
+                Thread.sleep(200) // don't waste cpu cycles if no input is given
             }
         }
     }
-    // scalastyle:on
-}
+    protected def processMenuInput(line: String): Unit = {
+        val playerPattern = """(?:a|r)(?:\s+(.*))?""".r
+        try {
+            line match {
+                case "q" => controller.onClose; return
+                case "n" => controller.onStartGame; return
+                case playerPattern(name) if line.startsWith("a") => controller.addPlayer(Option(name))
+                case playerPattern(name) if line.startsWith("r") => if (name != null) {
+                    controller.removePlayer(name)
+                }
+                case "h" => controller.onHelp;
+                case _ => logger.info("Unknown command")
+            }
+        } catch {
+            case e: ControllerException => logger.error(e.getMessage)
+        }
 
-object TUI {
-    def create(controller: Controller): TUI = {
-        new TUI(controller)
+        displayMenu
     }
+
+    protected def processGameInput(line: String): Unit = {
+        line match {
+            case "q" => controller.onClose
+            case "1" => controller.answerChosen(1)
+            case "2" => controller.answerChosen(2)
+            case "3" => controller.answerChosen(3)
+            case "4" => controller.answerChosen(4)
+            case "6" => controller.answerChosen(6)
+            case "7" => controller.answerChosen(7)
+            case "8" => controller.answerChosen(8)
+            case "9" => controller.answerChosen(9)
+            case _ => logger.info("Unknown command")
+        }
+    }
+
+    protected def processResultInput(line: String): Unit = {
+        line match {
+            case "q" => controller.onClose
+            case _ => logger.info("Unknown command")
+        }
+    }
+    // scalastyle:on
+
+    protected def displayGamePretty(question: Question, multiplayer: Boolean, timeRemaining: Int): Unit = {
+        logger.info("")
+        displayGame(question, multiplayer)
+        logger.info("Time remaining: " + timeRemaining + "s")
+        logger.info("")
+    }
+
 }
