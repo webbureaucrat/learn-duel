@@ -4,37 +4,34 @@ import java.util.{Timer, TimerTask}
 
 import de.htwg.se.learn_duel.controller.impl.exceptions._
 import de.htwg.se.learn_duel.controller.{Controller => ControllerTrait}
+import de.htwg.se.learn_duel.model.command.CommandInvoker
+import de.htwg.se.learn_duel.model.command.impl.{PlayerAddCommand, PlayerRemoveCommand}
 import de.htwg.se.learn_duel.model.{Game, Player, Question}
 import de.htwg.se.learn_duel.{UpdateAction, UpdateData}
 
 class Controller(gameState: Game) extends ControllerTrait {
     protected var questionIter: Iterator[Question] = Iterator.empty
     protected var timer: Option[Timer] = None
+    protected val invoker = CommandInvoker.create
 
-    override def getCurrentPlayers: List[String] = {
+    override def getPlayerNames: List[String] = {
         gameState.players.map(p => p.name)
     }
+    
+    override def onAddPlayer(name: Option[String]) : Unit = {
+        invoker.execute(new PlayerAddCommand(name, addPlayer, removePlayer))
+    }
 
-    // FIXME undo / redo pattern for player adding and removing
-    override def addPlayer(name: Option[String]): Unit = {
-        var playerName = name match {
-            case Some(name) => name
-            case None => nextPlayerName.getOrElse("<unknown>") // will not be used if None
-        }
+    override def onRemovePlayer(name: String): Unit = {
+        invoker.execute(new PlayerRemoveCommand(name, removePlayer, addPlayer))
+    }
 
-        if (gameState.playerCount == Game.maxPlayerCount) {
-            throw TooManyPlayersException("There are too many players to add another one")
-        }
-        else if (gameState.players.exists(p => p.name == playerName)) {
-            throw PlayerExistsException(s"'$playerName' already exists")
-        }
+    override def onPlayerActionUndo: Unit = {
+        invoker.undo
+    }
 
-        try {
-            gameState.addPlayer(Player.create(playerName))
-        } catch {
-            case e: Throwable => throw ControllerProcedureFailed("Adding player failed: " + e.getMessage)
-        }
-        notifyObservers(new UpdateData(UpdateAction.PLAYER_UPDATE, gameState))
+    override def onPlayerActionRedo: Unit = {
+        invoker.redo
     }
 
     override def nextPlayerName: Option[String] = {
@@ -45,19 +42,6 @@ class Controller(gameState: Game) extends ControllerTrait {
     }
 
     override def maxPlayerCount: Int = Game.maxPlayerCount
-
-    override def removePlayer(name: String): Unit = {
-        if (gameState.playerCount == 1) {
-            throw NotEnoughPlayersException("There are not enough players to remove one")
-        }
-
-        gameState.players.find(p => p.name == name) match {
-            case Some(p) =>
-                gameState.removePlayer(p)
-                notifyObservers(new UpdateData(UpdateAction.PLAYER_UPDATE, gameState))
-            case None => throw PlayerNotExistingException(s"Player '$name' does not exist")
-        }
-    }
 
     override def onHelp(): Unit = {
         if (gameState.helpText.isEmpty) {
@@ -82,7 +66,8 @@ class Controller(gameState: Game) extends ControllerTrait {
         notifyObservers(new UpdateData(UpdateAction.CLOSE_APPLICATION, gameState))
     }
 
-    override def answerChosen(input: Int): Unit = {
+    // scalastyle:off
+    override def onAnswerChosen(input: Int): Unit = {
         val currentQuestion = gameState.currentQuestion.get
         val correctAnswer = currentQuestion.correctAnswer
         val player = input match {
@@ -109,6 +94,42 @@ class Controller(gameState: Game) extends ControllerTrait {
 
         if (allAnswered) {
             nextQuestion
+        }
+    }
+    // scalastyle:on
+
+    protected def addPlayer(name: Option[String]): String = {
+        var playerName = name match {
+            case Some(name) => name
+            case None => nextPlayerName.getOrElse("<unknown>") // will not be used if None
+        }
+
+        if (gameState.playerCount == Game.maxPlayerCount) {
+            throw TooManyPlayersException("There are too many players to add another one")
+        }
+        else if (gameState.players.exists(p => p.name == playerName)) {
+            throw PlayerExistsException(s"'$playerName' already exists")
+        }
+
+        try {
+            gameState.addPlayer(Player.create(playerName))
+        } catch {
+            case e: Throwable => throw ControllerProcedureFailed("Adding player failed: " + e.getMessage)
+        }
+        notifyObservers(new UpdateData(UpdateAction.PLAYER_UPDATE, gameState))
+        playerName
+    }
+
+    protected  def removePlayer(name: String): Unit = {
+        if (gameState.playerCount == 1) {
+            throw NotEnoughPlayersException("There are not enough players to remove one")
+        }
+
+        gameState.players.find(p => p.name == name) match {
+            case Some(p) =>
+                gameState.removePlayer(p)
+                notifyObservers(new UpdateData(UpdateAction.PLAYER_UPDATE, gameState))
+            case None => throw PlayerNotExistingException(s"Player '$name' does not exist")
         }
     }
 

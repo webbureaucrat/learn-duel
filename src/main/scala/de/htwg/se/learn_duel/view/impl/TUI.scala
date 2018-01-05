@@ -17,7 +17,7 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
     displayMenu
 
     def displayPlayers(): Unit = {
-        logger.info("Current players: " + controller.getCurrentPlayers.mkString(", "))
+        logger.info("Current players: " + controller.getPlayerNames.mkString(", "))
     }
 
     override def displayMenu(): Unit = {
@@ -118,33 +118,36 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
         val playerPattern = """(?:a|r)(?:\s+(.*))?""".r
         try {
             line match {
-                case "q" => controller.onClose; return
-                case "n" => controller.onStartGame; return
-                case playerPattern(name) if line.startsWith("a") => controller.addPlayer(Option(name))
+                case "q" => controller.onClose
+                case "n" => controller.onStartGame
+                case playerPattern(name) if line.startsWith("a") => controller.onAddPlayer(Option(name))
                 case playerPattern(name) if line.startsWith("r") => if (name != null) {
-                    controller.removePlayer(name)
+                    controller.onRemovePlayer(name)
                 }
-                case "h" => controller.onHelp;
-                case _ => logger.info("Unknown command")
+                case "h" => controller.onHelp
+                case "u" => controller.onPlayerActionUndo
+                case "U" => controller.onPlayerActionRedo
+                case _ => {
+                    logger.info("Unknown command")
+                    displayMenu
+                }
             }
         } catch {
             case e: ControllerException => logger.error(e.getMessage)
         }
-
-        displayMenu
     }
 
     protected def processGameInput(line: String): Unit = {
         line match {
             case "q" => controller.onClose
-            case "1" => controller.answerChosen(1)
-            case "2" => controller.answerChosen(2)
-            case "3" => controller.answerChosen(3)
-            case "4" => controller.answerChosen(4)
-            case "6" => controller.answerChosen(6)
-            case "7" => controller.answerChosen(7)
-            case "8" => controller.answerChosen(8)
-            case "9" => controller.answerChosen(9)
+            case "1" => controller.onAnswerChosen(1)
+            case "2" => controller.onAnswerChosen(2)
+            case "3" => controller.onAnswerChosen(3)
+            case "4" => controller.onAnswerChosen(4)
+            case "6" => controller.onAnswerChosen(6)
+            case "7" => controller.onAnswerChosen(7)
+            case "8" => controller.onAnswerChosen(8)
+            case "9" => controller.onAnswerChosen(9)
             case _ => logger.info("Unknown command")
         }
     }

@@ -76,9 +76,9 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
         this.stage = new MenuStage(
             - => controller.onStartGame,
             _ => controller.onHelp,
-            (controller.getCurrentPlayers, controller.nextPlayerName),
-            (name) => controller.addPlayer(Some(name)),
-            controller.removePlayer
+            (controller.getPlayerNames, controller.nextPlayerName),
+            (name) => controller.onAddPlayer(Some(name)),
+            controller.onRemovePlayer
         )
     }
 
@@ -86,7 +86,7 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
         this.stage = new GameStage(
             question,
             !multiplayer,
-            controller.answerChosen
+            controller.onAnswerChosen
         )
     }
 
@@ -94,4 +94,3 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
         this.stage = new ResultStage(players)
     }
 }
-
