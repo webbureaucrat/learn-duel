@@ -14,10 +14,6 @@ import scalafx.application.JFXApp
 
 class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI with Observer with LazyLogging {
     controller.addObserver(this)
-    displayMenu()
-    this.stage.onCloseRequest = { (_) =>
-        controller.onClose
-    }
 
     // handle self defined exception in a 'global' exception handler
     Thread.currentThread().setUncaughtExceptionHandler((t: Thread, e: Throwable) => {
@@ -41,6 +37,12 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
         // every update needs to be run on the JavaFX Application thread
         Platform.runLater { () =>
             updateParam.getAction() match {
+                case UpdateAction.BEGIN => {
+                    displayMenu()
+                    this.stage.onCloseRequest = { (_) =>
+                        controller.onClose
+                    }
+                }
                 case UpdateAction.CLOSE_APPLICATION => this.stage.close()
                 case UpdateAction.SHOW_HELP => {
                     val helpText = updateParam.getState().helpText
@@ -54,7 +56,7 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
                         updateParam.getState().players.length > 1
                     )
                 }
-                case UpdateAction.UPDATE_TIMER => {
+                case UpdateAction.TIMER_UPDATE => {
                     updateParam.getState().currentQuestionTime match {
                         case Some(time) => {
                             if (this.stage.isInstanceOf[GameStage]) {

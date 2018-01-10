@@ -12,30 +12,35 @@ import de.htwg.se.learn_duel.{UpdateAction, UpdateData}
 class Controller(gameState: Game) extends ControllerTrait {
     protected var questionIter: Iterator[Question] = Iterator.empty
     protected var timer: Option[Timer] = None
-    protected val invoker = CommandInvoker.create
+    protected var lastUpdate: UpdateData = new UpdateData(UpdateAction.BEGIN, gameState)
+    protected val invoker: CommandInvoker = CommandInvoker.create
+
+    override def requestUpdate: Unit = {
+        notifyObserversAndSaveUpdate(lastUpdate)
+    }
 
     override def getPlayerNames: List[String] = {
         gameState.players.map(p => p.name)
     }
     
     override def onAddPlayer(name: Option[String]) : Unit = {
-        invoker.execute(new PlayerAddCommand(name, addPlayer, removePlayer))
+        invoker.execute(PlayerAddCommand(name, addPlayer, removePlayer))
     }
 
     override def onRemovePlayer(name: String): Unit = {
-        invoker.execute(new PlayerRemoveCommand(name, removePlayer, addPlayer))
+        invoker.execute(PlayerRemoveCommand(name, removePlayer, addPlayer))
     }
 
     override def onPlayerActionUndo: Unit = {
-        invoker.undo
+        invoker.undo()
     }
 
     override def onPlayerActionRedo: Unit = {
-        invoker.redo
+        invoker.redo()
     }
 
     override def nextPlayerName: Option[String] = {
-        gameState.playerCount match {
+        gameState.playerCount() match {
             case c if c < maxPlayerCount => Some(Player.baseName + (gameState.playerCount + 1).toString)
             case _ => None
         }
@@ -43,27 +48,27 @@ class Controller(gameState: Game) extends ControllerTrait {
 
     override def maxPlayerCount: Int = Game.maxPlayerCount
 
-    override def onHelp(): Unit = {
+    override def onHelp: Unit = {
         if (gameState.helpText.isEmpty) {
             import scala.io.Source
             val helpText: Iterator[String] = Source.fromResource("help.txt").getLines
             gameState.helpText = helpText.mkString("\n")
         }
 
-        notifyObservers(new UpdateData(UpdateAction.SHOW_HELP, gameState))
+        notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.SHOW_HELP, gameState))
     }
 
-    override def onStartGame(): Unit = {
+    override def onStartGame: Unit = {
         resetQuestionIterator()
         if (!questionIter.hasNext) {
-            throw new IllegalStateException("Can't start game without questions");
+            throw new IllegalStateException("Can't start game without questions")
         }
 
-        showGame()
+        nextQuestion()
     }
 
-    override def onClose(): Unit = {
-        notifyObservers(new UpdateData(UpdateAction.CLOSE_APPLICATION, gameState))
+    override def onClose: Unit = {
+        notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.CLOSE_APPLICATION, gameState))
     }
 
     // scalastyle:off
@@ -71,7 +76,7 @@ class Controller(gameState: Game) extends ControllerTrait {
         val currentQuestion = gameState.currentQuestion.get
         val correctAnswer = currentQuestion.correctAnswer
         val player = input match {
-            case x if 0 until 5 contains x => Some(gameState.players(0))
+            case x if 0 until 5 contains x => Some(gameState.players.head)
             case x if (6 until 10 contains x) && (gameState.players.length > 1 )=> Some(gameState.players(1))
             case _ => None
         }
@@ -93,14 +98,14 @@ class Controller(gameState: Game) extends ControllerTrait {
         })
 
         if (allAnswered) {
-            nextQuestion
+            nextQuestion()
         }
     }
     // scalastyle:on
 
     protected def addPlayer(name: Option[String]): String = {
         var playerName = name match {
-            case Some(name) => name
+            case Some(n) => n
             case None => nextPlayerName.getOrElse("<unknown>") // will not be used if None
         }
 
@@ -116,7 +121,9 @@ class Controller(gameState: Game) extends ControllerTrait {
         } catch {
             case e: Throwable => throw ControllerProcedureFailed("Adding player failed: " + e.getMessage)
         }
-        notifyObservers(new UpdateData(UpdateAction.PLAYER_UPDATE, gameState))
+
+        notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.PLAYER_UPDATE, gameState))
+
         playerName
     }
 
@@ -128,7 +135,7 @@ class Controller(gameState: Game) extends ControllerTrait {
         gameState.players.find(p => p.name == name) match {
             case Some(p) =>
                 gameState.removePlayer(p)
-                notifyObservers(new UpdateData(UpdateAction.PLAYER_UPDATE, gameState))
+                notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.PLAYER_UPDATE, gameState))
             case None => throw PlayerNotExistingException(s"Player '$name' does not exist")
         }
     }
@@ -144,15 +151,16 @@ class Controller(gameState: Game) extends ControllerTrait {
     }
 
     protected def setUpTimer(): Unit = {
-        timer = Some(new Timer(true))
-        val localTimer = timer.get
+        val localTimer = new Timer(true)
+        timer = Some(localTimer)
+
         localTimer.scheduleAtFixedRate(new TimerTask {
             override def run(): Unit = {
-                gameState.currentQuestionTime = gameState.currentQuestionTime match {
+                val newTime = gameState.currentQuestionTime match {
                     case Some(time) => {
                         val newTime = time - 1
                         if (newTime == 0) {
-                            nextQuestion
+                            nextQuestion()
                             None
                         } else {
                             Some(newTime)
@@ -161,11 +169,13 @@ class Controller(gameState: Game) extends ControllerTrait {
                     case None => None
                 }
 
-                gameState.currentQuestionTime match {
-                    case Some(time) if time % 5 == 0 => {
-                        notifyObservers(new UpdateData(UpdateAction.UPDATE_TIMER, gameState))
+                newTime match {
+                    case Some(time) => {
+                        gameState.currentQuestionTime = newTime
+                        if (time % 5 == 0) {
+                            notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.TIMER_UPDATE, gameState))
+                        }
                     }
-                    case None => stopTimer
                     case _ =>
                 }
             }
@@ -173,36 +183,42 @@ class Controller(gameState: Game) extends ControllerTrait {
     }
 
     protected def nextQuestion(): Unit = {
-        // implicitely add not given answer as wrong answer
-        val currentQuestion = gameState.currentQuestion.get
-        val noAnswerPlayers: List[Player] = gameState.players.filter(p => {
-            !playerAnsweredQuestion(p, currentQuestion.id)
-        })
+        stopTimer()
 
-        noAnswerPlayers.foreach(p => p.wrongAnswers = p.wrongAnswers :+ currentQuestion)
+        // implicitely add not given answer as wrong answer
+        if (gameState.currentQuestion.isDefined) {
+            val currentQuestion = gameState.currentQuestion.get
+            val noAnswerPlayers: List[Player] = gameState.players.filter(p => {
+                !playerAnsweredQuestion(p, currentQuestion.id)
+            })
+
+            noAnswerPlayers.foreach(p => p.wrongAnswers = p.wrongAnswers :+ currentQuestion)
+        }
 
         if (questionIter.hasNext) {
             showGame()
         } else {
-            stopTimer()
-            notifyObservers(new UpdateData(UpdateAction.SHOW_RESULT, gameState))
+            notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.SHOW_RESULT, gameState))
         }
     }
 
     protected def showGame(): Unit = {
-        stopTimer()
-
         val nextQuestion = questionIter.next()
         gameState.currentQuestion = Some(nextQuestion)
         gameState.currentQuestionTime = Some(nextQuestion.time)
         setUpTimer()
 
-        notifyObservers((new UpdateData(UpdateAction.SHOW_GAME, gameState)))
+        notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.SHOW_GAME, gameState))
     }
 
     protected def playerAnsweredQuestion(p: Player, questionId: Int): Boolean = {
         (p.correctAnswers ::: p.wrongAnswers).exists(q => {
             q.id == questionId
         })
+    }
+
+    protected def notifyObserversAndSaveUpdate(data: UpdateData): Unit = {
+        lastUpdate = data
+        notifyObservers(data)
     }
 }

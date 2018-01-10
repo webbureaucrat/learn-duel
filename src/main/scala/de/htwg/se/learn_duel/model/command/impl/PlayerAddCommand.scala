@@ -1,6 +1,5 @@
 package de.htwg.se.learn_duel.model.command.impl
 
-import de.htwg.se.learn_duel.controller.Controller
 import de.htwg.se.learn_duel.model.command.Command
 
 case class PlayerAddCommand(

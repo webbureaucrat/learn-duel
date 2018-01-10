@@ -8,6 +8,7 @@ trait Controller extends Observable {
     def nextPlayerName: Option[String]
     def getPlayerNames: List[String]
     def maxPlayerCount: Int
+    def requestUpdate: Unit
     def onAddPlayer(name: Option[String]): Unit
     def onRemovePlayer(name: String): Unit
     def onPlayerActionUndo: Unit

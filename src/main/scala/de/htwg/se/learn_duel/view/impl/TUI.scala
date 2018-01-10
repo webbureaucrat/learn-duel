@@ -14,7 +14,6 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
     var stopProcessingInput = false
     var inMenu = true
     var inGame = false
-    displayMenu
 
     def displayPlayers(): Unit = {
         logger.info("Current players: " + controller.getPlayerNames.mkString(", "))
@@ -70,6 +69,7 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
     // scalastyle:off
     override def update(updateParam: UpdateData): Unit = {
         updateParam.getAction() match {
+            case UpdateAction.BEGIN => displayMenu
             case UpdateAction.CLOSE_APPLICATION => stopProcessingInput = true
             case UpdateAction.SHOW_HELP => {
                 logger.info(updateParam.getState().helpText)
@@ -84,7 +84,7 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
                 inMenu = false;
                 inGame = true;
             }
-            case UpdateAction.UPDATE_TIMER => {
+            case UpdateAction.TIMER_UPDATE => {
                 displayGamePretty(
                     updateParam.getState().currentQuestion.get,
                     updateParam.getState().players.length > 1,

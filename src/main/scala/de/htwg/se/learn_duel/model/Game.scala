@@ -1,6 +1,6 @@
 package de.htwg.se.learn_duel.model
 
-import de.htwg.se.learn_duel.model.impl.{Game => GameImpl, Player => PlayerImpl, Question => QuestionImpl}
+import de.htwg.se.learn_duel.model.impl.{Game => GameImpl}
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import play.api.libs.functional.syntax._
 

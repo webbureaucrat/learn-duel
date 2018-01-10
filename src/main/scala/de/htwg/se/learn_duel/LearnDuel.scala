@@ -21,6 +21,7 @@ object LearnDuel {
         val tui = TUI.create(controller)
         GUI.create(controller)
 
+        controller.requestUpdate
         tui.processInput(new BufferedReader(Console.in))
     }
 }
