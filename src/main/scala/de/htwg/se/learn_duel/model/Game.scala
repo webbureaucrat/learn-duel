@@ -1,10 +1,10 @@
 package de.htwg.se.learn_duel.model
 
 import de.htwg.se.learn_duel.model.impl.{Game => GameImpl}
-import play.api.libs.json.{JsPath, Json, Reads, Writes}
+import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-trait Game {
+trait Game extends Resettable {
     var helpText: String
     var players: List[Player]
     var questions: List[Question]
@@ -23,8 +23,8 @@ trait Game {
 object Game {
     val maxPlayerCount = 2
 
-    implicit val gameWrites = new Writes[Game] {
-        def writes(game: Game) = Json.obj(
+    implicit val gameWrites: Writes[Game] = new Writes[Game] {
+        def writes(game: Game): JsObject = Json.obj(
             "helpText" -> game.helpText,
             "players" -> game.players,
             "questions" -> game.questions,

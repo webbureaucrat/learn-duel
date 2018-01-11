@@ -43,7 +43,7 @@ class MenuStage(
 
                     val removeBtn = new Button {
                         text = "-"
-                        onAction = - => playerRemoveAction(playerName)
+                        onAction = _ => playerRemoveAction(playerName)
                     }
                     children += removeBtn
                 }
@@ -60,7 +60,7 @@ class MenuStage(
 
                         val addBtn = new Button {
                             text = "+"
-                            onAction = - => playerAddAction(
+                            onAction = _ => playerAddAction(
                                 if (txtField.getText.isEmpty) {
                                     txtField.getPromptText
                                 } else {

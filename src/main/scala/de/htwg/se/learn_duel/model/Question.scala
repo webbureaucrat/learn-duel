@@ -1,7 +1,7 @@
 package de.htwg.se.learn_duel.model
 
 import de.htwg.se.learn_duel.model.impl.{Question => QuestionImpl}
-import play.api.libs.json.{JsPath, Json, Reads, Writes}
+import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 trait Question {
@@ -14,8 +14,8 @@ trait Question {
 }
 
 object Question {
-    implicit val questionWrites = new Writes[Question] {
-        def writes(question: Question) = Json.obj(
+    implicit val questionWrites: Writes[Question] = new Writes[Question] {
+        def writes(question: Question): JsObject = Json.obj(
             "id" -> question.id,
             "text" -> question.text,
             "points" -> question.points,

@@ -4,13 +4,15 @@ import de.htwg.se.learn_duel.model.Player
 
 import scalafx.Includes._
 import scalafx.application.JFXApp.PrimaryStage
-import scalafx.scene.{Node, Scene}
+import scalafx.scene.control.Button
+import scalafx.scene.Scene
 import scalafx.scene.layout.VBox
 import scalafx.scene.paint.Color._
 import scalafx.scene.text.Text
 
 class ResultStage(
-    players: List[Player]
+    players: List[Player],
+    backAction: Function0[Unit]
 ) extends PrimaryStage {
     title.value = "Learn Duel Result"
     width = 480
@@ -46,6 +48,12 @@ class ResultStage(
             }}
 
             children.add(new Text("'" + player.name + "' won the game!"))
+
+            val backButton = new Button {
+                text = "Back"
+                onAction = backAction
+            }
+            children += backButton
         }
     }
 }

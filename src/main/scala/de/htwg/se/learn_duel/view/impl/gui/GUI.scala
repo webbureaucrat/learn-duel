@@ -76,7 +76,7 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
 
     override def displayMenu(): Unit = {
         this.stage = new MenuStage(
-            - => controller.onStartGame,
+            _ => controller.onStartGame,
             _ => controller.onHelp,
             (controller.getPlayerNames, controller.nextPlayerName),
             (name) => controller.onAddPlayer(Some(name)),
@@ -93,6 +93,6 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
     }
 
     override def displayResult(players: List[Player]): Unit = {
-        this.stage = new ResultStage(players)
+        this.stage = new ResultStage(players, controller.reset)
     }
 }

@@ -13,10 +13,15 @@ class Controller(gameState: Game) extends ControllerTrait {
     protected var questionIter: Iterator[Question] = Iterator.empty
     protected var timer: Option[Timer] = None
     protected var lastUpdate: UpdateData = new UpdateData(UpdateAction.BEGIN, gameState)
-    protected val invoker: CommandInvoker = CommandInvoker.create
+    protected val invoker: CommandInvoker = CommandInvoker.create()
 
-    override def requestUpdate: Unit = {
+    override def requestUpdate(): Unit = {
         notifyObserversAndSaveUpdate(lastUpdate)
+    }
+
+    override def reset(): Unit = {
+        gameState.reset()
+        notifyObservers(new UpdateData(UpdateAction.BEGIN, gameState))
     }
 
     override def getPlayerNames: List[String] = {
@@ -31,24 +36,24 @@ class Controller(gameState: Game) extends ControllerTrait {
         invoker.execute(PlayerRemoveCommand(name, removePlayer, addPlayer))
     }
 
-    override def onPlayerActionUndo: Unit = {
+    override def onPlayerActionUndo(): Unit = {
         invoker.undo()
     }
 
-    override def onPlayerActionRedo: Unit = {
+    override def onPlayerActionRedo(): Unit = {
         invoker.redo()
     }
 
-    override def nextPlayerName: Option[String] = {
+    override def nextPlayerName(): Option[String] = {
         gameState.playerCount() match {
             case c if c < maxPlayerCount => Some(Player.baseName + (gameState.playerCount + 1).toString)
             case _ => None
         }
     }
 
-    override def maxPlayerCount: Int = Game.maxPlayerCount
+    override def maxPlayerCount(): Int = Game.maxPlayerCount
 
-    override def onHelp: Unit = {
+    override def onHelp(): Unit = {
         if (gameState.helpText.isEmpty) {
             import scala.io.Source
             val helpText: Iterator[String] = Source.fromResource("help.txt").getLines
@@ -58,7 +63,7 @@ class Controller(gameState: Game) extends ControllerTrait {
         notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.SHOW_HELP, gameState))
     }
 
-    override def onStartGame: Unit = {
+    override def onStartGame(): Unit = {
         resetQuestionIterator()
         if (!questionIter.hasNext) {
             throw new IllegalStateException("Can't start game without questions")
@@ -67,7 +72,7 @@ class Controller(gameState: Game) extends ControllerTrait {
         nextQuestion()
     }
 
-    override def onClose: Unit = {
+    override def onClose(): Unit = {
         notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.CLOSE_APPLICATION, gameState))
     }
 
@@ -106,7 +111,7 @@ class Controller(gameState: Game) extends ControllerTrait {
     protected def addPlayer(name: Option[String]): String = {
         var playerName = name match {
             case Some(n) => n
-            case None => nextPlayerName.getOrElse("<unknown>") // will not be used if None
+            case None => nextPlayerName().getOrElse("<unknown>") // will not be used if None
         }
 
         if (gameState.playerCount == Game.maxPlayerCount) {

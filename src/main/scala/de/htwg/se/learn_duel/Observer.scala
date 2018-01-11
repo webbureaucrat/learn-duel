@@ -14,5 +14,5 @@ class UpdateData(updateAction: UpdateAction, gameState: Game) {
 }
 
 trait Observer {
-    protected def update(updateData: UpdateData): Unit
+    def update(updateData: UpdateData): Unit
 }
