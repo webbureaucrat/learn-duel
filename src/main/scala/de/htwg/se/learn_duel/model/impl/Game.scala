@@ -27,9 +27,11 @@ case class Game(
     override def questionCount(): Int = questions.size
 
     override def reset(): Unit = {
+        questions = initialQuestions
+        currentQuestion = None
+        currentQuestionTime = None
         players = List()
         addPlayer(new Player("Player1"))
-        questions = initialQuestions
     }
 }
 

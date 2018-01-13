@@ -81,7 +81,7 @@ class Controller(gameState: Game) extends ControllerTrait {
         val currentQuestion = gameState.currentQuestion.get
         val correctAnswer = currentQuestion.correctAnswer
         val player = input match {
-            case x if 0 until 5 contains x => Some(gameState.players.head)
+            case x if (0 until 5 contains x) => Some(gameState.players.head)
             case x if (6 until 10 contains x) && (gameState.players.length > 1 )=> Some(gameState.players(1))
             case _ => None
         }
