@@ -22,7 +22,7 @@
       }
     ],
     "correctAnswer": 2,
-    "time": 5
+    "time": 60
   },
   {
     "id": 2,
@@ -47,6 +47,6 @@
       }
     ],
     "correctAnswer": 4,
-    "time": 120
+    "time": 60
   }
 ]

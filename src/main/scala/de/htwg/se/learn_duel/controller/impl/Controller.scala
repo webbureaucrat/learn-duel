@@ -80,14 +80,14 @@ class Controller(gameState: Game) extends ControllerTrait {
     override def onAnswerChosen(input: Int): Unit = {
         val currentQuestion = gameState.currentQuestion.get
         val correctAnswer = currentQuestion.correctAnswer
-        val player = input match {
-            case x if (0 until 5 contains x) => Some(gameState.players.head)
-            case x if (6 until 10 contains x) && (gameState.players.length > 1 )=> Some(gameState.players(1))
+        val (player: Option[Player], userInput: Int) = input match {
+            case x if (0 until 5 contains x) => (Some(gameState.players.head), input)
+            case x if (6 until 10 contains x) && (gameState.players.length > 1 )=> (Some(gameState.players(1)), input-5) // FIXME magic number -> local mp will be removed anyway
             case _ => None
         }
 
         if (player.isDefined && !playerAnsweredQuestion(player.get, currentQuestion.id)) {
-            if (input == correctAnswer) {
+            if (userInput == correctAnswer) {
                 player.get.points += currentQuestion.points
                 player.get.correctAnswers = player.get.correctAnswers :+ currentQuestion
             } else {
