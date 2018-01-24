@@ -6,6 +6,7 @@ import de.htwg.se.learn_duel.model.impl.{Player => PlayerImpl}
 import org.junit.runner.RunWith
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner
+import play.api.libs.json.Json
 
 @RunWith(classOf[JUnitRunner])
 class PlayerSpec extends WordSpec with Matchers {
@@ -40,8 +41,16 @@ class PlayerSpec extends WordSpec with Matchers {
                 val player = PlayerImpl("Your Name")
             }
         }
+    }
 
+    "A Player" should {
+        "be serializable to JSON" in {
+            val player = PlayerImpl("YourName")
 
+            val jsonValue = Json.parse("{ \"name\": \"YourName\", \"points\": 0, \"correctAnswers\": [], \"wrongAnswers\": [] }")
+
+            Json.toJson(player) should be(jsonValue)
+        }
     }
 }
 
