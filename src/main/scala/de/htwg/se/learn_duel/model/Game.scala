@@ -5,7 +5,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 trait Game extends Resettable {
-    var helpText: String
+    var helpText: List[String]
     var players: List[Player]
     var questions: List[Question]
     var currentQuestion: Option[Question]
@@ -34,7 +34,7 @@ object Game {
     }
 
     implicit val questionReads: Reads[Game] = (
-            (JsPath \ "helpText").read[String] and
+            (JsPath \ "helpText").read[List[String]] and
             (JsPath \ "players").read[List[Player]] and
             (JsPath \ "questions").read[List[Question]] and
             (JsPath \ "currentQuestion").readNullable[Question] and

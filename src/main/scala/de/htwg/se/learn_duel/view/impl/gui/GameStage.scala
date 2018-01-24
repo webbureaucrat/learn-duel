@@ -28,38 +28,52 @@ class GameStage(
 
     title.value = "Learn Duel Game"
     width = 640
-    height = 480
+    height = allowMouseInput match {
+        case true => 480
+        case false => 520
+    }
 
     scene = new Scene {
         fill = White
-        root = new VBox {
-            children += new Text(question.text)
+        stylesheets += "styles.css"
 
-            val pane = new TilePane {
-                prefColumns = 2
+        root = new VBox {
+            styleClass += "game"
+
+            val questionProp = new Text {
+                text = question.text
+                styleClass += "headline"
+            }
+            children += questionProp
+
+            val answerBox = new VBox {
+                styleClass += "answer-container"
 
                 question.answers.zipWithIndex.foreach { case (ans, i) =>
                     val btn = new Button {
+                        styleClass += "answer-button"
+
                         text = "Answer " + (i + 1) + ": " + ans.text
                         if (allowMouseInput) {
                             onAction = _ => onInput(ans.id)
                         }
-                        minWidth = 200
                     }
 
                     children += btn
                 }
             }
-            children += pane
+            children += answerBox
 
-            val timer = new Text()
+            val timer = new Text {
+                styleClass += "remaining-time"
+            }
             timer.text.bind(timerText)
             children += timer
 
             if (!allowMouseInput) {
                 val warning = new Text {
                     text = "Mouse input not allowed, use keyboard instead"
-                    fill = Color.RED
+                    fill = Color.Red
                 }
 
                 children += warning

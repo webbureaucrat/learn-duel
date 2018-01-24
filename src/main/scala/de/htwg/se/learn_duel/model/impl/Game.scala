@@ -2,10 +2,10 @@ package de.htwg.se.learn_duel.model.impl
 
 import java.security.InvalidParameterException
 
-import de.htwg.se.learn_duel.model.{Resettable, Game => GameTrait, Player => PlayerTrait, Question => QuestionTrait}
+import de.htwg.se.learn_duel.model.{Game => GameTrait, Player => PlayerTrait, Question => QuestionTrait}
 
-case class Game(
-       var helpText: String = "",
+case class Game (
+       var helpText: List[String] = List(),
        var players: List[PlayerTrait] = List(),
        var questions: List[QuestionTrait] = List(),
        var currentQuestion: Option[QuestionTrait] = None,
@@ -31,7 +31,14 @@ case class Game(
         currentQuestion = None
         currentQuestionTime = None
         players = List()
-        addPlayer(new Player("Player1"))
+        addPlayer(Player("Player1"))
+        helpText = List(
+            "Learn Duel is based on QuizDuel and works in a similar fashion, but with a new twist:\nYou play with questions based on your school or study assignments.",
+            "For now, there is only local play, but online features will be added later.\nIf you are playing alone, the answers can be selected with the mouse or the keys 1-4.\nIn local multiplayer mode player 1 can specify his answer with the keys 1-4 and\nplayer 2 with the keys 6-9.",
+            "Future features:",
+            "* define your own questions",
+            "* play with up to 3 friends online and compete against each other"
+        )
     }
 }
 

@@ -2,6 +2,7 @@ package de.htwg.se.learn_duel.controller.impl
 
 import java.util.{Timer, TimerTask}
 
+import com.google.inject.Inject
 import de.htwg.se.learn_duel.controller.impl.exceptions._
 import de.htwg.se.learn_duel.controller.{Controller => ControllerTrait}
 import de.htwg.se.learn_duel.model.command.CommandInvoker
@@ -9,7 +10,7 @@ import de.htwg.se.learn_duel.model.command.impl.{PlayerAddCommand, PlayerRemoveC
 import de.htwg.se.learn_duel.model.{Game, Player, Question}
 import de.htwg.se.learn_duel.{UpdateAction, UpdateData}
 
-class Controller(gameState: Game) extends ControllerTrait {
+class Controller @Inject() (gameState: Game) extends ControllerTrait {
     protected var questionIter: Iterator[Question] = Iterator.empty
     protected var timer: Option[Timer] = None
     protected var lastUpdate: UpdateData = new UpdateData(UpdateAction.BEGIN, gameState)
@@ -54,12 +55,6 @@ class Controller(gameState: Game) extends ControllerTrait {
     override def maxPlayerCount(): Int = Game.maxPlayerCount
 
     override def onHelp(): Unit = {
-        if (gameState.helpText.isEmpty) {
-            import scala.io.Source
-            val helpText: Iterator[String] = Source.fromResource("help.txt").getLines
-            gameState.helpText = helpText.mkString("\n")
-        }
-
         notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.SHOW_HELP, gameState))
     }
 
@@ -80,10 +75,10 @@ class Controller(gameState: Game) extends ControllerTrait {
     override def onAnswerChosen(input: Int): Unit = {
         val currentQuestion = gameState.currentQuestion.get
         val correctAnswer = currentQuestion.correctAnswer
-        val (player: Option[Player], userInput: Int) = input match {
+        var (player: Option[Player], userInput: Int) = input match {
             case x if (0 until 5 contains x) => (Some(gameState.players.head), input)
             case x if (6 until 10 contains x) && (gameState.players.length > 1 )=> (Some(gameState.players(1)), input-5) // FIXME magic number -> local mp will be removed anyway
-            case _ => None
+            case _ => (None, input)
         }
 
         if (player.isDefined && !playerAnsweredQuestion(player.get, currentQuestion.id)) {
@@ -177,9 +172,7 @@ class Controller(gameState: Game) extends ControllerTrait {
                 newTime match {
                     case Some(time) => {
                         gameState.currentQuestionTime = newTime
-                        if (time % 5 == 0) {
-                            notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.TIMER_UPDATE, gameState))
-                        }
+                        notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.TIMER_UPDATE, gameState))
                     }
                     case _ =>
                 }

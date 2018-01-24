@@ -2,11 +2,12 @@ package de.htwg.se.learn_duel.view
 
 import java.util.concurrent.CountDownLatch
 
+import com.google.inject.Inject
 import de.htwg.se.learn_duel.Observer
 import de.htwg.se.learn_duel.controller.Controller
 import de.htwg.se.learn_duel.model.{Player, Question}
-import de.htwg.se.learn_duel.view.impl.{ TUI => TUIImpl }
-import de.htwg.se.learn_duel.view.impl.gui.{ GUI => GUIImpl }
+import de.htwg.se.learn_duel.view.impl.{TUI => TUIImpl}
+import de.htwg.se.learn_duel.view.impl.gui.{GUI => GUIImpl}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

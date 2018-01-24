@@ -1,11 +1,13 @@
 package de.htwg.se.learn_duel.view.impl.gui
 
-import scalafx.scene.control.{ButtonType, Dialog}
+import scalafx.geometry.Insets
+import scalafx.scene.control.{ButtonType, Dialog, DialogPane}
 import scalafx.stage.Modality
 
-class InfoPopup(titleText: String, content: String) extends Dialog[Unit] {
+class InfoPopup(titleText: String, text: String) extends Dialog[Unit] {
     title = titleText
-    contentText = content
+    contentText = text
+
     dialogPane.value.getButtonTypes.add(ButtonType.OK)
     initModality(Modality.None)
 }

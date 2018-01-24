@@ -72,7 +72,7 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
             case UpdateAction.BEGIN => displayMenu
             case UpdateAction.CLOSE_APPLICATION => stopProcessingInput = true
             case UpdateAction.SHOW_HELP => {
-                logger.info(updateParam.getState().helpText)
+                logger.info(updateParam.getState().helpText.mkString("\n\n"))
             }
             case UpdateAction.PLAYER_UPDATE => displayPlayers
             case UpdateAction.SHOW_GAME => {

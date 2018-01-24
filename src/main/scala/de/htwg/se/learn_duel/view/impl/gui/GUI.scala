@@ -19,7 +19,9 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
     Thread.currentThread().setUncaughtExceptionHandler((t: Thread, e: Throwable) => {
         e.getCause match {
             case cause: ControllerException => {
-                new InfoPopup("Error", cause.message).show
+                val infoPopup = new InfoPopup("Error", cause.message)
+                infoPopup.getDialogPane().getStylesheets().add("styles.css")
+                infoPopup.show
             }
             case _ => {
                 val sw = new StringWriter()
@@ -33,6 +35,7 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
     // signal initialization down
     latch.countDown()
 
+    // scalastyle:off
     override def update(updateParam: UpdateData): Unit = {
         // every update needs to be run on the JavaFX Application thread
         Platform.runLater { () =>
@@ -46,7 +49,8 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
                 case UpdateAction.CLOSE_APPLICATION => this.stage.close()
                 case UpdateAction.SHOW_HELP => {
                     val helpText = updateParam.getState().helpText
-                    val dlg = new InfoPopup("Learn Duel Help", helpText)
+                    val dlg = new InfoPopup("Learn Duel Help", helpText.mkString("\n\n"))
+                    dlg.getDialogPane().getStylesheets().add("styles.css")
                     dlg.show
                 }
                 case UpdateAction.PLAYER_UPDATE => displayMenu
@@ -73,6 +77,7 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
             }
         }
     }
+    // scalastyle:on
 
     override def displayMenu(): Unit = {
         this.stage = new MenuStage(
