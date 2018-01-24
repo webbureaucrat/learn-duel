@@ -1,4 +1,4 @@
-# Learn Duel
+# Learn Duel [![Build Status](https://travis-ci.org/DonatJR/learn-duel.svg?branch=develop)](https://travis-ci.org/DonatJR/learn-duel) [![Coverage Status](https://coveralls.io/repos/github/DonatJR/learn-duel/badge.svg?branch=develop)](https://coveralls.io/github/DonatJR/learn-duel?branch=develop)
 
 ## About
 Learn Duel is based on QuizDuel and works in a similar fashion, but with a new twist:
