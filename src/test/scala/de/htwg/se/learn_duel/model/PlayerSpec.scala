@@ -30,26 +30,29 @@ class PlayerSpec extends WordSpec with Matchers {
             }
         }
 
-        "not accept emtpy names" in {
-            assertThrows[InvalidParameterException] {
-                val player = PlayerImpl("")
+        "constructed without name" should {
+            "not accept emtpy names" in {
+                assertThrows[InvalidParameterException] {
+                    val player = PlayerImpl("")
+                }
             }
         }
 
-        "not accept names with whitespace" in {
-            assertThrows[InvalidParameterException] {
-                val player = PlayerImpl("Your Name")
+        "constructed with a name with withspace" should {
+            "not accept names with whitespace" in {
+                assertThrows[InvalidParameterException] {
+                    val player = PlayerImpl("Your Name")
+                }
             }
         }
-    }
+        "serialized to JSON" should {
+            "be correct" in {
+                val player = PlayerImpl("YourName")
 
-    "A Player" should {
-        "be serializable to JSON" in {
-            val player = PlayerImpl("YourName")
+                val jsonValue = Json.parse("{ \"name\": \"YourName\", \"points\": 0, \"correctAnswers\": [], \"wrongAnswers\": [] }")
 
-            val jsonValue = Json.parse("{ \"name\": \"YourName\", \"points\": 0, \"correctAnswers\": [], \"wrongAnswers\": [] }")
-
-            Json.toJson(player) should be(jsonValue)
+                Json.toJson(player) should be(jsonValue)
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import java.security.InvalidParameterException
 
 import de.htwg.se.learn_duel.model.{Game => GameTrait, Player => PlayerTrait, Question => QuestionTrait}
 
+// FIXME find better way for resetting or do not let all props be specified in constructor (currently needed for JSON reader)
 case class Game (
        var helpText: List[String] = List(),
        var players: List[PlayerTrait] = List(),
@@ -20,7 +21,7 @@ case class Game (
 
     override def playerCount(): Int = players.size
 
-    override def addQuestion(question: QuestionTrait): Unit = questions :+ question
+    override def addQuestion(question: QuestionTrait): Unit = questions = questions :+ question
 
     override def removeQuestion(question: QuestionTrait): Unit = questions = questions.filter(_ != question)
 
