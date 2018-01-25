@@ -62,6 +62,14 @@ class CommandInvokerSpec extends WordSpec with Matchers {
                 commandInvoker.redoCommands.length should be(0)
                 commandInvoker.undoCommands.length should be(1)
             }
+            "not do anything on redo when there are no commands to redo" in {
+                commandInvoker.redoCommands.length should be(0)
+
+                addCalled = false
+                commandInvoker.redo()
+
+                addCalled should be(false)
+            }
         }
 
         "constructed with factory method" should {
