@@ -1,5 +1,6 @@
 package de.htwg.se.learn_duel.controller
 
+import de.htwg.se.learn_duel.controller.impl.exceptions._
 import de.htwg.se.learn_duel.{Observer, UpdateAction, UpdateData}
 import de.htwg.se.learn_duel.model.{Game, Question}
 import de.htwg.se.learn_duel.model.impl.{Game => GameImpl}
@@ -120,7 +121,7 @@ class ControllerSpec extends WordSpec with Matchers {
                 gameState.players.head.wrongAnswers.length should be(1)
                 dummyObserver.updateData.get.getAction() should be(UpdateAction.SHOW_RESULT)
             }
-            "should update question timer" in {
+            "update question timer" in {
                 controller.reset()
                 controller.onStartGame()
                 val time = gameState.currentQuestionTime
@@ -128,6 +129,7 @@ class ControllerSpec extends WordSpec with Matchers {
                 gameState.currentQuestionTime should not be(time)
             }
             "remove observers correctly" in {
+                controller.reset()
                 controller.onHelp()
                 val currentAction = dummyObserver.updateData.get.getAction()
                 currentAction should not be(UpdateAction.SHOW_GAME)
@@ -135,6 +137,53 @@ class ControllerSpec extends WordSpec with Matchers {
                 controller.onStartGame()
                 dummyObserver.updateData.get.getAction() should not be(UpdateAction.SHOW_GAME)
                 dummyObserver.updateData.get.getAction() should be(currentAction)
+            }
+            "throw when adding or removing too many players" in {
+                controller.reset()
+                controller.onAddPlayer(None)
+                assertThrows[TooManyPlayersException] {
+                    controller.onAddPlayer(Some("invalidthirdplayer"))
+                }
+
+                controller.reset()
+                assertThrows[NotEnoughPlayersException] {
+                    controller.onRemovePlayer("Player1")
+                }
+            }
+            "throw when adding a already existing or removing a non existing player" in {
+                assertThrows[PlayerExistsException] {
+                    controller.onAddPlayer(Some("Player1"))
+                }
+
+                controller.onAddPlayer(None)
+                assertThrows[PlayerNotExistingException] {
+                    controller.onRemovePlayer("nonexistingplayer")
+                }
+            }
+            "throw when internal objects throw" in {
+                controller.reset()
+                assertThrows[ControllerProcedureFailed] {
+                    controller.onAddPlayer(Some("Player With Space"))
+                }
+            }
+        }
+        "constructed with very small questions timers" should {
+            "show next question and results when timer runs out" in {
+                val tempJsonString = jsonString.replace("\"time\": 60", "\"time\": 1")
+                val tempJson = Json.parse(tempJsonString)
+                val tempList = Json.fromJson[List[Question]](tempJson).getOrElse(List())
+                val tempGame = GameImpl(questions = tempList)
+                val tempController = Controller.create(tempGame)
+                val tempObserver = new DummyObserver()
+
+                tempController.addObserver(tempObserver)
+                tempController.onAddPlayer(None)
+
+                tempController.onStartGame()
+                Thread.sleep(3000)
+
+                tempObserver.updateData.get.getAction() should be(UpdateAction.SHOW_RESULT)
+                tempGame.players.foreach(p => p.wrongAnswers.length should be(2))
             }
         }
         "constructed with no questions" should {
