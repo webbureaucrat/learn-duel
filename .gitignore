@@ -43,4 +43,4 @@ project/.sbtserver
 .sonar/
 
 # Application
-yourgame.log
+learn-duel.log

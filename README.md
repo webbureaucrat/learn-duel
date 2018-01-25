@@ -1,35 +1,16 @@
-# Htwg Scala Seed Project 
-=====================================================
-## the easiest way to start a project for the lecture SE
+# Learn Duel [![Build Status](https://travis-ci.org/DonatJR/learn-duel.svg?branch=develop)](https://travis-ci.org/DonatJR/learn-duel) [![Coverage Status](https://coveralls.io/repos/github/DonatJR/learn-duel/badge.svg?branch=develop)](https://coveralls.io/github/DonatJR/learn-duel?branch=develop)
+
+## About
+Learn Duel is based on QuizDuel and works in a similar fashion, but with a new twist:
+You play with questions based on your school or study assignments.
+
+## Current features
+For now, there is only local play, but online features will be added later.
+If you are playing alone, the answers can be selected with the mouse or the keys 1-4.
+In local multiplayer mode player 1 can specify his answer with the keys 1-4 and
+player 2 with the keys 6-9.
 
 
-This is a seed project to create a basic scala project as used in the
-class Software Engineering at the University of Applied Science HTWG Konstanz.
-
-It requires Java 8 on your local platform.
-The project has
-* a folder structure prepared for a MVC-style application
-* *ScalaTest* and as dependency aswell as dependencies to other libraries in the build.sbt (commented out at start).
-* *scalastyle-sbt-plugin* and *sbt-scoverage* sbt plugins
-* .gitignore defaults
-
-The easiest way to create your own project from this seed is
-* create an account on github
-* navigate to this project on github (https://github.com/markoboger/htwg-scala-seed)
-* fork this project on github (button on top right "Fork")
-* copy the URL to your fork
-* clone the forked project from your local git (git clone <URL>) or IDE (IDEA: File > New > Import from Version Controll > github)
-
-After that, please rename
-* the Project name from htwg-scala-seed to <your game name>
-* the the package structure from de.htwg.se.yourgame to de.htwg.se.<your game name>
-* the name of the project in the build.sbt file from htwg-scala-seed to <your game name>
-* the main Class YourGame to <YourGameName>
-
-Then
-* push to git
-* add team partner to your project on github (Settings > Collaborators)
-* clone on partners account
-* push and pull back and forth
-
-
+## Future features:
+ - define your own questions
+ - play with up to 3 friends online and compete against each other
