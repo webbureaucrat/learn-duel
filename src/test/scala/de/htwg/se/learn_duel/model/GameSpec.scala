@@ -17,10 +17,6 @@ class GameSpec extends WordSpec with Matchers {
             "have no questions" in {
                 game.questions.length should be(0)
             }
-            var players: List[Player] = List()
-            var helpText: List[String] = List()
-            var currentQuestion: Option[Question] = None
-            var currentQuestionTime: Option[Int] = None
             "have a standard player" in {
                 game.players.length should be(1)
             }
