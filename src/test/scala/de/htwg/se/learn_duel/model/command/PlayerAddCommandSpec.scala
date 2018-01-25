@@ -1,4 +1,4 @@
-package de.htwg.se.learn_duel.model
+package de.htwg.se.learn_duel.model.command
 
 import java.security.InvalidParameterException
 

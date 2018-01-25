@@ -15,5 +15,6 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
 
 import org.scoverage.coveralls.Imports.CoverallsKeys._
-coverageExcludedPackages := ".*view.*;.*GuiceModule\\.scala;.*LearnDuel\\.scala"
+coverageExcludedPackages := ".*view.*;.*GuiceModule.*;.*LearnDuel.*"
 coverageEnabled := true
+coverageHighlighting := true
