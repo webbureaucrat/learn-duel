@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "text": "What is 1+1?",
+    "points": 20,
+    "answers": [
+      {
+        "id": 1,
+        "text": "1"
+      },
+      {
+        "id": 2,
+        "text": "2"
+      },
+      {
+        "id": 3,
+        "text": "3"
+      },
+      {
+        "id": 4,
+        "text": "4"
+      }
+    ],
+    "correctAnswer": 2,
+    "time": 60
+  },
+  {
+    "id": 2,
+    "text": "What is 5*20?",
+    "points": 50,
+    "answers": [
+      {
+        "id": 1,
+        "text": "168"
+      },
+      {
+        "id": 2,
+        "text": "934"
+      },
+      {
+        "id": 3,
+        "text": "236"
+      },
+      {
+        "id": 4,
+        "text": "100"
+      }
+    ],
+    "correctAnswer": 4,
+    "time": 60
+  }
+]

@@ -1,12 +1,15 @@
 package de.htwg.se.learn_duel.controller
 
-import com.google.inject.Guice
-import de.htwg.se.learn_duel.{GuiceModule, Observer, UpdateAction, UpdateData}
-import de.htwg.se.learn_duel.model.Game
+import de.htwg.se.learn_duel.{Observer, UpdateAction, UpdateData}
+import de.htwg.se.learn_duel.model.{Game, Question}
+import de.htwg.se.learn_duel.model.impl.{Game => GameImpl}
 import de.htwg.se.learn_duel.controller.impl.{Controller => ControllerImpl}
 import org.junit.runner.RunWith
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner
+import play.api.libs.json.{JsValue, Json}
+
+import scala.io.Source
 
 class DummyObserver extends Observer {
     var updateData: Option[UpdateData] = None
@@ -18,8 +21,10 @@ class DummyObserver extends Observer {
 @RunWith(classOf[JUnitRunner])
 class ControllerSpec extends WordSpec with Matchers {
     "A Controller" when {
-        val injector = Guice.createInjector(new GuiceModule())
-        val gameState = injector.getInstance(classOf[Game])
+        val jsonString: String = Source.fromResource("test_questions.json").getLines.mkString("\n")
+        val json: JsValue = Json.parse(jsonString)
+        val questionList: List[Question] = Json.fromJson[List[Question]](json).getOrElse(List())
+        val gameState = GameImpl(questions = questionList)
         val dummyObserver = new DummyObserver()
 
         "constructed" should {
@@ -31,6 +36,7 @@ class ControllerSpec extends WordSpec with Matchers {
                 controller.requestUpdate()
                 dummyObserver.updateData.isDefined should be(true)
                 dummyObserver.updateData.get.getAction() should be(UpdateAction.BEGIN)
+                dummyObserver.updateData.get.getState() should be(gameState)
             }
             "be able to generate a list of player names" in {
                 controller.getPlayerNames should be(gameState.players.map(p => p.name))
@@ -98,8 +104,51 @@ class ControllerSpec extends WordSpec with Matchers {
                 gameState.currentQuestionTime should be(None)
                 dummyObserver.updateData.get.getAction() should be(UpdateAction.BEGIN)
             }
-        }
+            "add correctly and wrongly answered questions to player and move on to next question" in {
+                gameState.players.head.correctAnswers.length should be(0)
+                gameState.players.head.wrongAnswers.length should be(0)
+                controller.onStartGame()
 
+                val question1 = gameState.currentQuestion
+
+                controller.onAnswerChosen(2)
+
+                gameState.players.head.correctAnswers.length should be(1)
+
+                controller.onAnswerChosen(1)
+
+                gameState.players.head.wrongAnswers.length should be(1)
+                dummyObserver.updateData.get.getAction() should be(UpdateAction.SHOW_RESULT)
+            }
+            "should update question timer" in {
+                controller.reset()
+                controller.onStartGame()
+                val time = gameState.currentQuestionTime
+                Thread.sleep(2000)
+                gameState.currentQuestionTime should not be(time)
+            }
+            "remove observers correctly" in {
+                controller.onHelp()
+                val currentAction = dummyObserver.updateData.get.getAction()
+                currentAction should not be(UpdateAction.SHOW_GAME)
+                controller.removeObserver(dummyObserver)
+                controller.onStartGame()
+                dummyObserver.updateData.get.getAction() should not be(UpdateAction.SHOW_GAME)
+                dummyObserver.updateData.get.getAction() should be(currentAction)
+            }
+        }
+        "constructed with no questions" should {
+            val newState = GameImpl(questions = questionList)
+            newState.questions = List()
+
+            val controller = new ControllerImpl(newState)
+
+            "throw on start game" in {
+                assertThrows[IllegalStateException] {
+                    controller.onStartGame()
+                }
+            }
+        }
         "constructed with factory method" should {
             val manualController = new ControllerImpl(gameState)
             "be valid" in {

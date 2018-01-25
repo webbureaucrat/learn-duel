@@ -60,7 +60,8 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
 
     override def onStartGame(): Unit = {
         resetQuestionIterator()
-        if (!questionIter.hasNext) {
+
+        if (questionIter.isEmpty) {
             throw new IllegalStateException("Can't start game without questions")
         }
 
