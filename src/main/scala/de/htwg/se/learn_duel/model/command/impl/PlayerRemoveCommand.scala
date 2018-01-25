@@ -5,11 +5,11 @@ import de.htwg.se.learn_duel.model.command.Command
 
 case class PlayerRemoveCommand(
     name: String,
-    remvoePlayer: Function[String, Unit],
+    removePlayer: Function[String, Unit],
     addPlayer: Function[Option[String], String]
 ) extends Command {
     override def execute(): Unit = {
-        remvoePlayer(name)
+        removePlayer(name)
     }
 
     override def undo(): Unit = {

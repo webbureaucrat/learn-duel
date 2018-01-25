@@ -60,8 +60,8 @@ class GameSpec extends WordSpec with Matchers {
                 Json.toJson(game) should be(jsonValue)
             }
         }
-        "when constructed" should {
-            val player = PlayerImpl("bla")
+        "constructed" should {
+            val player = PlayerImpl("player")
             val question = QuestionImpl(0, "text1", 20, List(), 0, 20)
             val game = GameImpl()
 
