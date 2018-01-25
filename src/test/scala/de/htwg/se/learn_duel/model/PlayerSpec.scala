@@ -30,6 +30,17 @@ class PlayerSpec extends WordSpec with Matchers {
             }
         }
 
+        "constructed by factory method" should {
+            "be the same as constructing it directly" in {
+                val player = Player.create("YourName")
+                player.name should be("YourName")
+                player.toString should be("YourName")
+                player.points should be(0)
+                player.correctAnswers.length should be (0)
+                player.wrongAnswers.length should be (0)
+            }
+        }
+
         "constructed without name" should {
             "not accept emtpy names" in {
                 assertThrows[InvalidParameterException] {
