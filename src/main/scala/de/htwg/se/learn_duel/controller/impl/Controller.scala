@@ -22,7 +22,7 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
 
     override def reset(): Unit = {
         gameState.reset()
-        notifyObservers(new UpdateData(UpdateAction.BEGIN, gameState))
+        notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.BEGIN, gameState))
     }
 
     override def getPlayerNames: List[String] = {
