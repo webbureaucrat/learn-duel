@@ -36,8 +36,8 @@ class ControllerSpec extends WordSpec with Matchers {
                 dummyObserver.updateData should be(None)
                 controller.requestUpdate()
                 dummyObserver.updateData.isDefined should be(true)
-                dummyObserver.updateData.get.getAction() should be(UpdateAction.BEGIN)
-                dummyObserver.updateData.get.getState() should be(gameState)
+                dummyObserver.updateData.get.getAction should be(UpdateAction.BEGIN)
+                dummyObserver.updateData.get.getState should be(gameState)
             }
             "be able to generate a list of player names" in {
                 controller.getPlayerNames should be(gameState.players.map(p => p.name))
@@ -80,30 +80,30 @@ class ControllerSpec extends WordSpec with Matchers {
             }
             "indicate to observers that they should show the help" in {
                 controller.onHelp()
-                dummyObserver.updateData.get.getAction() should be(UpdateAction.SHOW_HELP)
+                dummyObserver.updateData.get.getAction should be(UpdateAction.SHOW_HELP)
             }
             "indicate to observers that they should start the game" in {
                 controller.onStartGame()
-                dummyObserver.updateData.get.getAction() should be(UpdateAction.SHOW_GAME)
+                dummyObserver.updateData.get.getAction should be(UpdateAction.SHOW_GAME)
                 gameState.currentQuestion should not be(None)
                 gameState.currentQuestionTime should not be(None)
             }
             "indicate to observers that they should close" in {
                 controller.onClose()
-                dummyObserver.updateData.get.getAction() should be(UpdateAction.CLOSE_APPLICATION)
+                dummyObserver.updateData.get.getAction should be(UpdateAction.CLOSE_APPLICATION)
             }
             "be able to reset game state" in {
                 controller.onPlayerActionRedo()
                 gameState.playerCount() should be(2)
                 gameState.currentQuestion should not be(None)
                 gameState.currentQuestionTime should not be(None)
-                dummyObserver.updateData.get.getAction() should not be(UpdateAction.BEGIN)
+                dummyObserver.updateData.get.getAction should not be(UpdateAction.BEGIN)
 
                 controller.reset()
                 gameState.playerCount() should be(1)
                 gameState.currentQuestion should be(None)
                 gameState.currentQuestionTime should be(None)
-                dummyObserver.updateData.get.getAction() should be(UpdateAction.BEGIN)
+                dummyObserver.updateData.get.getAction should be(UpdateAction.BEGIN)
             }
             "add correctly and wrongly answered questions to player and move on to next question" in {
                 gameState.players.head.correctAnswers.length should be(0)
@@ -119,7 +119,7 @@ class ControllerSpec extends WordSpec with Matchers {
                 controller.onAnswerChosen(1)
 
                 gameState.players.head.wrongAnswers.length should be(1)
-                dummyObserver.updateData.get.getAction() should be(UpdateAction.SHOW_RESULT)
+                dummyObserver.updateData.get.getAction should be(UpdateAction.SHOW_RESULT)
             }
             "update question timer" in {
                 controller.reset()
@@ -131,12 +131,12 @@ class ControllerSpec extends WordSpec with Matchers {
             "remove observers correctly" in {
                 controller.reset()
                 controller.onHelp()
-                val currentAction = dummyObserver.updateData.get.getAction()
+                val currentAction = dummyObserver.updateData.get.getAction
                 currentAction should not be(UpdateAction.SHOW_GAME)
                 controller.removeObserver(dummyObserver)
                 controller.onStartGame()
-                dummyObserver.updateData.get.getAction() should not be(UpdateAction.SHOW_GAME)
-                dummyObserver.updateData.get.getAction() should be(currentAction)
+                dummyObserver.updateData.get.getAction should not be(UpdateAction.SHOW_GAME)
+                dummyObserver.updateData.get.getAction should be(currentAction)
             }
             "throw when adding or removing too many players" in {
                 controller.reset()
@@ -182,7 +182,7 @@ class ControllerSpec extends WordSpec with Matchers {
                 tempController.onStartGame()
                 Thread.sleep(3000)
 
-                tempObserver.updateData.get.getAction() should be(UpdateAction.SHOW_RESULT)
+                tempObserver.updateData.get.getAction should be(UpdateAction.SHOW_RESULT)
                 tempGame.players.foreach(p => p.wrongAnswers.length should be(2))
             }
         }
