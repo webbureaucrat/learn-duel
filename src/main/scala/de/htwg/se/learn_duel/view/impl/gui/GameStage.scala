@@ -10,7 +10,7 @@ import scalafx.Includes._
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.Scene
 import scalafx.scene.control.Button
-import scalafx.scene.layout.{TilePane, VBox}
+import scalafx.scene.layout.VBox
 import scalafx.scene.paint.Color
 import scalafx.scene.paint.Color._
 import scalafx.scene.text.Text
@@ -20,8 +20,8 @@ class GameStage(
     allowMouseInput: Boolean,
     onInput: Function[Int, Unit]
 ) extends PrimaryStage {
-    var timeRemaining = question.time
-    var timerText = new SimpleStringProperty {
+    var timeRemaining: Int = question.time
+    var timerText: SimpleStringProperty = new SimpleStringProperty {
         "Time remaining: " + timeRemaining + "s"
     }
     var timer: Option[Timer] = None
@@ -40,13 +40,13 @@ class GameStage(
         root = new VBox {
             styleClass += "game"
 
-            val questionProp = new Text {
+            val questionProp: Text = new Text {
                 text = question.text
                 styleClass += "headline"
             }
             children += questionProp
 
-            val answerBox = new VBox {
+            val answerBox: VBox = new VBox {
                 styleClass += "answer-container"
 
                 question.answers.zipWithIndex.foreach { case (ans, i) =>
@@ -64,7 +64,7 @@ class GameStage(
             }
             children += answerBox
 
-            val timer = new Text {
+            val timer: Text = new Text {
                 styleClass += "remaining-time"
             }
             timer.text.bind(timerText)
@@ -81,7 +81,7 @@ class GameStage(
         }
 
         onKeyReleased = { e => {
-            e.getCode() match {
+            e.getCode match {
                 case KeyCode.DIGIT1 => onInput(1)
                 case KeyCode.DIGIT2 => onInput(2)
                 case KeyCode.DIGIT3 => onInput(3)

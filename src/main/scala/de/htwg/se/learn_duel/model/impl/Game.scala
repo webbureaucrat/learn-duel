@@ -1,7 +1,5 @@
 package de.htwg.se.learn_duel.model.impl
 
-import java.security.InvalidParameterException
-
 import de.htwg.se.learn_duel.model.{Game => GameTrait, Player => PlayerTrait, Question => QuestionTrait}
 
 // FIXME find better way for resetting or do not let all props be specified in constructor (currently needed for JSON reader)

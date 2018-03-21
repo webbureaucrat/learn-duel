@@ -4,13 +4,11 @@ import javafx.event.{ActionEvent, EventHandler}
 
 import scalafx.Includes._
 import scalafx.application.JFXApp.PrimaryStage
-import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.control.{Button, TextField}
 import scalafx.scene.layout._
-import scalafx.scene.paint.Color
 import scalafx.scene.paint.Color._
-import scalafx.scene.text.{Text, TextAlignment}
+import scalafx.scene.text.Text
 
 class MenuStage(
    newGameAction: EventHandler[ActionEvent],
@@ -31,27 +29,27 @@ class MenuStage(
         root = new VBox {
             styleClass += "menu"
 
-            val headLine = new Text {
+            val headLine: Text = new Text {
                 text = "Learn Duel"
                 styleClass += "headline"
             }
             children += headLine
 
-            val newGameButton = new Button {
+            val newGameButton: Button = new Button {
                 text = "New Game"
                 onAction = newGameAction
                 styleClass += "play-button"
             }
             children += newGameButton
 
-            val playerContainer = new VBox {
+            val playerContainer: VBox = new VBox {
                 styleClass += "player-rows-container"
 
                 for (playerName <- playerInfo._1) {
                     val hBox = new HBox {
                         styleClass += "player-container"
 
-                        val txtFld = new TextField {
+                        val txtFld: TextField = new TextField {
                             text = playerName
                             editable = false
                             styleClass += "player-textfield"
@@ -59,7 +57,7 @@ class MenuStage(
                         }
                         children += txtFld
 
-                        val removeBtn = new Button {
+                        val removeBtn: Button = new Button {
                             text = "Remove"
                             onAction = _ => playerRemoveAction(playerName)
                             styleClass += "add-remove-buttons"
@@ -74,13 +72,13 @@ class MenuStage(
                         val hBox = new HBox {
                             styleClass += "player-container"
 
-                            val txtField = new TextField {
+                            val txtField: TextField = new TextField {
                                 promptText = nextPlayername
                                 styleClass += "player-textfield"
                             }
                             children += txtField
 
-                            val addBtn = new Button {
+                            val addBtn: Button = new Button {
                                 text = "Add"
                                 onAction = _ => playerAddAction(
                                     if (txtField.getText.isEmpty) {
@@ -100,7 +98,7 @@ class MenuStage(
             }
             children += playerContainer
 
-            val helpButton = new Button {
+            val helpButton: Button = new Button {
                 text = "Help"
                 onAction = helpAction
                 styleClass += "help-button"

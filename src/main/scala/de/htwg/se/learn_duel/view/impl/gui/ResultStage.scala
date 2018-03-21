@@ -7,7 +7,6 @@ import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.control.Button
 import scalafx.scene.Scene
 import scalafx.scene.layout.VBox
-import scalafx.scene.paint.Color
 import scalafx.scene.paint.Color._
 import scalafx.scene.text.Text
 
@@ -29,35 +28,35 @@ class ResultStage(
         root = new VBox {
             styleClass += "result"
 
-            val headline = new Text {
+            val headline: Text = new Text {
                 text = "Result"
                 styleClass += "headline"
             }
             children += headline
 
-            val playerContainer = new VBox {
+            val playerContainer: VBox = new VBox {
                 styleClass += "player-results"
 
                 players.foreach { p => {
                     val singlePlayerContainer = new VBox {
                         styleClass += "player-result"
 
-                        val player = new Text {
+                        val player: Text = new Text {
                             text = p.name
                             styleClass += "player-name"
                         }
                         children += player
 
-                        val points = new Text {
+                        val points: Text = new Text {
                             text = "Points: " + p.points
                             styleClass += "player-points"
                         }
                         children += points
 
-                        val correctContainer = new VBox {
+                        val correctContainer: VBox = new VBox {
                             styleClass += "correct-container"
 
-                            if (p.correctAnswers.length > 0) {
+                            if (p.correctAnswers.nonEmpty) {
                                 val correctText = new Text {
                                     text = "Correct answers"
                                     styleClass += "correct-text"
@@ -75,10 +74,10 @@ class ResultStage(
                         }
                         children += correctContainer
 
-                        val wrongContainer = new VBox {
+                        val wrongContainer: VBox = new VBox {
                             styleClass += "wrong-container"
 
-                            if (p.wrongAnswers.length > 0) {
+                            if (p.wrongAnswers.nonEmpty) {
                                 val wrongText = new Text {
                                     text = "Wrong answers"
                                     styleClass += "wrong-text"
@@ -102,17 +101,17 @@ class ResultStage(
             }
             children += playerContainer
 
-            val player = players.max[Player]{ case (p1: Player, p2: Player) => {
+            val player: Player = players.max[Player]{ case (p1: Player, p2: Player) => {
                 p1.points.compareTo(p2.points)
             }}
 
-            val winner = new Text {
+            val winner: Text = new Text {
                 text = "'" + player.name + "' won the game!"
                 styleClass += "winner"
             }
             children += winner
 
-            val backButton = new Button {
+            val backButton: Button = new Button {
                 text = "Back"
                 onAction = backAction
                 styleClass += "back-button"

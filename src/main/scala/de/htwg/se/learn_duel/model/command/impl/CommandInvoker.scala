@@ -12,7 +12,7 @@ case class CommandInvoker() extends CommandInvokerTrait {
     override def undo(): Unit = {
         if (undoCommands.nonEmpty) {
             val lastCommand = undoCommands.last
-            lastCommand.undo
+            lastCommand.undo()
             redoCommands = redoCommands :+ lastCommand
             undoCommands = undoCommands diff List(lastCommand)
         }
@@ -20,7 +20,7 @@ case class CommandInvoker() extends CommandInvokerTrait {
 
     override def redo(): Unit = {
         if (redoCommands.nonEmpty) {
-            redoCommands.head.redo
+            redoCommands.head.redo()
             undoCommands = undoCommands :+ redoCommands.head
             redoCommands = redoCommands diff List(redoCommands.head)
         }

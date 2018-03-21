@@ -9,8 +9,8 @@ import UpdateAction._
 import de.htwg.se.learn_duel.model.Game
 
 class UpdateData(updateAction: UpdateAction, gameState: Game) {
-    def getAction(): UpdateAction = updateAction
-    def getState(): Game = gameState
+    def getAction: UpdateAction = updateAction
+    def getState: Game = gameState
 }
 
 trait Observer {

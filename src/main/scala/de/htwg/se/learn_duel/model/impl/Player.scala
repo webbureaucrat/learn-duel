@@ -18,5 +18,3 @@ case class Player(
 
     override def toString: String = name
 }
-
-

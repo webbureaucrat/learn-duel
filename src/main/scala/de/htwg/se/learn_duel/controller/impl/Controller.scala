@@ -28,7 +28,7 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
     override def getPlayerNames: List[String] = {
         gameState.players.map(p => p.name)
     }
-    
+
     override def onAddPlayer(name: Option[String]) : Unit = {
         invoker.execute(PlayerAddCommand(name, addPlayer, removePlayer))
     }
@@ -77,8 +77,8 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
         val currentQuestion = gameState.currentQuestion.get
         val correctAnswer = currentQuestion.correctAnswer
         var (player: Option[Player], userInput: Int) = input match {
-            case x if (0 until 5 contains x) => (Some(gameState.players.head), input)
-            case x if (6 until 10 contains x) && (gameState.players.length > 1 )=> (Some(gameState.players(1)), input-5) // FIXME magic number -> local mp will be removed anyway
+            case x if 0 until 5 contains x => (Some(gameState.players.head), input)
+            case x if (6 until 10 contains x) && gameState.players.lengthCompare(1) > 0=> (Some(gameState.players(1)), input-5) // FIXME magic number -> local mp will be removed anyway
             case _ => (None, input)
         }
 
@@ -158,23 +158,21 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
         localTimer.scheduleAtFixedRate(new TimerTask {
             override def run(): Unit = {
                 val newTime = gameState.currentQuestionTime match {
-                    case Some(time) => {
-                        val newTime = time - 1
-                        if (newTime == 0) {
-                            nextQuestion()
-                            None
-                        } else {
-                            Some(newTime)
-                        }
-                    }
+                    case Some(time) =>
+                      val newTime = time - 1
+                      if (newTime == 0) {
+                          nextQuestion()
+                          None
+                      } else {
+                          Some(newTime)
+                      }
                     case None => None
                 }
 
                 newTime match {
-                    case Some(time) => {
-                        gameState.currentQuestionTime = newTime
-                        notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.TIMER_UPDATE, gameState))
-                    }
+                    case Some(time) =>
+                      gameState.currentQuestionTime = newTime
+                      notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.TIMER_UPDATE, gameState))
                     case _ =>
                 }
             }

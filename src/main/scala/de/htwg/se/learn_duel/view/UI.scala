@@ -2,7 +2,6 @@ package de.htwg.se.learn_duel.view
 
 import java.util.concurrent.CountDownLatch
 
-import com.google.inject.Inject
 import de.htwg.se.learn_duel.Observer
 import de.htwg.se.learn_duel.controller.Controller
 import de.htwg.se.learn_duel.model.{Player, Question}

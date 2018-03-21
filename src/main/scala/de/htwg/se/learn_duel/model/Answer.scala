@@ -10,12 +10,10 @@ trait Answer {
 }
 
 object Answer {
-    implicit val answerWrites: Writes[Answer] = new Writes[Answer] {
-        def writes(answer: Answer): JsObject = Json.obj(
-            "id" -> answer.id,
-            "text" -> answer.text,
-        )
-    }
+    implicit val answerWrites: Writes[Answer] = (answer: Answer) => Json.obj(
+        "id" -> answer.id,
+        "text" -> answer.text,
+    )
 
     implicit val answerReads: Reads[Answer] = (
             (JsPath \ "id").read[Int] and

@@ -1,7 +1,6 @@
 package de.htwg.se.learn_duel.view.impl
 
 import java.io.BufferedReader
-import java.util.{Timer, TimerTask}
 
 import com.typesafe.scalalogging.LazyLogging
 import de.htwg.se.learn_duel.{Observer, UpdateAction, UpdateData}
@@ -69,31 +68,27 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
     // scalastyle:off
     override def update(updateParam: UpdateData): Unit = {
         updateParam.getAction() match {
-            case UpdateAction.BEGIN => displayMenu
+            case UpdateAction.BEGIN => displayMenu()
             case UpdateAction.CLOSE_APPLICATION => stopProcessingInput = true
-            case UpdateAction.SHOW_HELP => {
+            case UpdateAction.SHOW_HELP =>
                 logger.info(updateParam.getState().helpText.mkString("\n\n"))
-            }
-            case UpdateAction.PLAYER_UPDATE => displayPlayers
-            case UpdateAction.SHOW_GAME => {
+            case UpdateAction.PLAYER_UPDATE => displayPlayers()
+            case UpdateAction.SHOW_GAME =>
                 displayGamePretty(
                     updateParam.getState().currentQuestion.get,
-                    updateParam.getState().players.length > 1,
+                    updateParam.getState().players.lengthCompare(1) > 0,
                     updateParam.getState().currentQuestionTime.get
                 )
                 inMenu = false;
                 inGame = true;
-            }
-            case UpdateAction.TIMER_UPDATE => {
+            case UpdateAction.TIMER_UPDATE =>
                 displayGamePretty(
                     updateParam.getState().currentQuestion.get,
-                    updateParam.getState().players.length > 1,
+                    updateParam.getState().players.lengthCompare(1) > 0,
                     updateParam.getState().currentQuestionTime.get
                 )
-            }
-            case UpdateAction.SHOW_RESULT => {
+            case UpdateAction.SHOW_RESULT =>
                 displayResult(updateParam.getState().players)
-            }
             case _ =>
         }
     }
@@ -118,19 +113,18 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
         val playerPattern = """(?:a|r)(?:\s+(.*))?""".r
         try {
             line match {
-                case "q" => controller.onClose
-                case "n" => controller.onStartGame
+                case "q" => controller.onClose()
+                case "n" => controller.onStartGame()
                 case playerPattern(name) if line.startsWith("a") => controller.onAddPlayer(Option(name))
                 case playerPattern(name) if line.startsWith("r") => if (name != null) {
                     controller.onRemovePlayer(name)
                 }
-                case "h" => controller.onHelp
-                case "u" => controller.onPlayerActionUndo
-                case "U" => controller.onPlayerActionRedo
-                case _ => {
+                case "h" => controller.onHelp()
+                case "u" => controller.onPlayerActionUndo()
+                case "U" => controller.onPlayerActionRedo()
+                case _ =>
                     logger.info("Unknown command")
-                    displayMenu
-                }
+                    displayMenu()
             }
         } catch {
             case e: ControllerException => logger.error(e.getMessage)
@@ -139,7 +133,7 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
 
     protected def processGameInput(line: String): Unit = {
         line match {
-            case "q" => controller.onClose
+            case "q" => controller.onClose()
             case "1" => controller.onAnswerChosen(1)
             case "2" => controller.onAnswerChosen(2)
             case "3" => controller.onAnswerChosen(3)
@@ -154,7 +148,7 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
 
     protected def processResultInput(line: String): Unit = {
         line match {
-            case "q" => controller.onClose
+            case "q" => controller.onClose()
             case _ => logger.info("Unknown command")
         }
     }
