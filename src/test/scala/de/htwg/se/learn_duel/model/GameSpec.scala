@@ -1,7 +1,5 @@
 package de.htwg.se.learn_duel.model
 
-import java.security.InvalidParameterException
-
 import de.htwg.se.learn_duel.model.impl.{Answer => AnswerImpl, Game => GameImpl, Player => PlayerImpl, Question => QuestionImpl}
 import org.junit.runner.RunWith
 import org.scalatest._

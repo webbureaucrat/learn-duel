@@ -85,8 +85,8 @@ class ControllerSpec extends WordSpec with Matchers {
             "indicate to observers that they should start the game" in {
                 controller.onStartGame()
                 dummyObserver.updateData.get.getAction should be(UpdateAction.SHOW_GAME)
-                gameState.currentQuestion should not be(None)
-                gameState.currentQuestionTime should not be(None)
+                gameState.currentQuestion should not be None
+                gameState.currentQuestionTime should not be None
             }
             "indicate to observers that they should close" in {
                 controller.onClose()
@@ -95,9 +95,9 @@ class ControllerSpec extends WordSpec with Matchers {
             "be able to reset game state" in {
                 controller.onPlayerActionRedo()
                 gameState.playerCount() should be(2)
-                gameState.currentQuestion should not be(None)
-                gameState.currentQuestionTime should not be(None)
-                dummyObserver.updateData.get.getAction should not be(UpdateAction.BEGIN)
+                gameState.currentQuestion should not be None
+                gameState.currentQuestionTime should not be None
+                dummyObserver.updateData.get.getAction should not be UpdateAction.BEGIN
 
                 controller.reset()
                 gameState.playerCount() should be(1)
@@ -126,16 +126,16 @@ class ControllerSpec extends WordSpec with Matchers {
                 controller.onStartGame()
                 val time = gameState.currentQuestionTime
                 Thread.sleep(2000)
-                gameState.currentQuestionTime should not be(time)
+                gameState.currentQuestionTime should not be time
             }
             "remove observers correctly" in {
                 controller.reset()
                 controller.onHelp()
                 val currentAction = dummyObserver.updateData.get.getAction
-                currentAction should not be(UpdateAction.SHOW_GAME)
+                currentAction should not be UpdateAction.SHOW_GAME
                 controller.removeObserver(dummyObserver)
                 controller.onStartGame()
-                dummyObserver.updateData.get.getAction should not be(UpdateAction.SHOW_GAME)
+                dummyObserver.updateData.get.getAction should not be UpdateAction.SHOW_GAME
                 dummyObserver.updateData.get.getAction should be(currentAction)
             }
             "throw when adding or removing too many players" in {

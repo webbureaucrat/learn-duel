@@ -1,7 +1,5 @@
 package de.htwg.se.learn_duel.model.command
 
-import java.security.InvalidParameterException
-
 import de.htwg.se.learn_duel.model.command.impl.PlayerAddCommand
 import org.junit.runner.RunWith
 import org.scalatest._
