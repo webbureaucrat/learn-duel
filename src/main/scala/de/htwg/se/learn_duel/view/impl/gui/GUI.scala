@@ -37,7 +37,7 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
     override def update(updateParam: UpdateData): Unit = {
         // every update needs to be run on the JavaFX Application thread
         Platform.runLater { () =>
-            updateParam.getAction() match {
+            updateParam.getAction match {
                 case UpdateAction.BEGIN =>
                     displayMenu()
                     this.stage.onCloseRequest = { (_) =>
@@ -45,18 +45,18 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
                     }
                 case UpdateAction.CLOSE_APPLICATION => this.stage.close()
                 case UpdateAction.SHOW_HELP =>
-                    val helpText = updateParam.getState().helpText
+                    val helpText = updateParam.getState.helpText
                     val dlg = new InfoPopup("Learn Duel Help", helpText.mkString("\n\n"))
                     dlg.getDialogPane.getStylesheets.add("styles.css")
                     dlg.show()
                 case UpdateAction.PLAYER_UPDATE => displayMenu()
                 case UpdateAction.SHOW_GAME =>
                     displayGame(
-                        updateParam.getState().currentQuestion.get,
-                        updateParam.getState().players.lengthCompare(1) > 0
+                        updateParam.getState.currentQuestion.get,
+                        updateParam.getState.players.lengthCompare(1) > 0
                     )
                 case UpdateAction.TIMER_UPDATE =>
-                    updateParam.getState().currentQuestionTime match {
+                    updateParam.getState.currentQuestionTime match {
                         case Some(time) =>
                             this.stage match {
                                 case stage1: GameStage =>
@@ -65,9 +65,8 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
                             }
                         case _ =>
                     }
-                case UpdateAction.SHOW_RESULT => {
-                    displayResult(updateParam.getState().players)
-                }
+                case UpdateAction.SHOW_RESULT =>
+                    displayResult(updateParam.getState.players)
                 case _ =>
             }
         }

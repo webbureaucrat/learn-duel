@@ -32,9 +32,9 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
 
     override def displayGame(question: Question, multiplayer: Boolean): Unit = {
         logger.info(question.text)
-        question.answers.zipWithIndex.foreach {case (ans, i) => {
+        question.answers.zipWithIndex.foreach {case (ans, i) =>
             logger.info((i + 1) + "/" + (i + 5) + ": " + ans.text)
-        }}
+        }
     }
 
     override def displayResult(players: List[Player]): Unit = {
@@ -56,9 +56,9 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
             })
         })
 
-        val player = players.max[Player]{ case (p1: Player, p2: Player) => {
+        val player = players.max[Player]{ case (p1: Player, p2: Player) =>
             p1.points.compareTo(p2.points)
-        }}
+        }
 
         logger.info("")
         logger.info("'" + player.name + "' won the game!")
@@ -67,28 +67,28 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
 
     // scalastyle:off
     override def update(updateParam: UpdateData): Unit = {
-        updateParam.getAction() match {
+        updateParam.getAction match {
             case UpdateAction.BEGIN => displayMenu()
             case UpdateAction.CLOSE_APPLICATION => stopProcessingInput = true
             case UpdateAction.SHOW_HELP =>
-                logger.info(updateParam.getState().helpText.mkString("\n\n"))
+                logger.info(updateParam.getState.helpText.mkString("\n\n"))
             case UpdateAction.PLAYER_UPDATE => displayPlayers()
             case UpdateAction.SHOW_GAME =>
                 displayGamePretty(
-                    updateParam.getState().currentQuestion.get,
-                    updateParam.getState().players.lengthCompare(1) > 0,
-                    updateParam.getState().currentQuestionTime.get
+                    updateParam.getState.currentQuestion.get,
+                    updateParam.getState.players.lengthCompare(1) > 0,
+                    updateParam.getState.currentQuestionTime.get
                 )
-                inMenu = false;
+                inMenu = false
                 inGame = true;
             case UpdateAction.TIMER_UPDATE =>
                 displayGamePretty(
-                    updateParam.getState().currentQuestion.get,
-                    updateParam.getState().players.lengthCompare(1) > 0,
-                    updateParam.getState().currentQuestionTime.get
+                    updateParam.getState.currentQuestion.get,
+                    updateParam.getState.players.lengthCompare(1) > 0,
+                    updateParam.getState.currentQuestionTime.get
                 )
             case UpdateAction.SHOW_RESULT =>
-                displayResult(updateParam.getState().players)
+                displayResult(updateParam.getState.players)
             case _ =>
         }
     }
