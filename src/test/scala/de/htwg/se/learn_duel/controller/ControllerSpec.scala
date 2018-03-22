@@ -43,7 +43,7 @@ class ControllerSpec extends WordSpec with Matchers {
                 controller.getPlayerNames should be(gameState.players.map(p => p.name))
             }
             "have a max player count" in {
-                controller.maxPlayerCount() should be (Game.maxPlayerCount)
+                controller.maxPlayerCount should be (Game.maxPlayerCount)
             }
             "be able to add a player" in {
                 gameState.playerCount() should be(1)
@@ -69,13 +69,13 @@ class ControllerSpec extends WordSpec with Matchers {
             }
             "not supply a next player name if max player count is reached" in {
                 gameState.playerCount() should be(2)
-                val nextName = controller.nextPlayerName()
+                val nextName = controller.nextPlayerName
                 nextName should be(None)
             }
             "supply a next player name if max player count was not reached" in {
                 controller.onPlayerActionUndo()
                 gameState.playerCount() should be(1)
-                val nextName = controller.nextPlayerName()
+                val nextName = controller.nextPlayerName
                 nextName should be(Some("Player2"))
             }
             "indicate to observers that they should show the help" in {

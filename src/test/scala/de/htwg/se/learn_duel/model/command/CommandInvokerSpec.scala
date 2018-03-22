@@ -1,6 +1,6 @@
 package de.htwg.se.learn_duel.model.command
 
-import de.htwg.se.learn_duel.model.command.impl.{ CommandInvoker => CommandInvokerImpl, PlayerAddCommand }
+import de.htwg.se.learn_duel.model.command.impl.{PlayerAddCommand, CommandInvoker => CommandInvokerImpl}
 import org.junit.runner.RunWith
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner
@@ -73,7 +73,7 @@ class CommandInvokerSpec extends WordSpec with Matchers {
         }
 
         "constructed with factory method" should {
-            val commandInvoker = CommandInvoker.create()
+            val commandInvoker = CommandInvoker.create
             "have no saved commands" in {
                 commandInvoker.undoCommands.length should be(0)
                 commandInvoker.redoCommands.length should be(0)

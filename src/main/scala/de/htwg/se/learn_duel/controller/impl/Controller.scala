@@ -14,7 +14,7 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
     protected var questionIter: Iterator[Question] = Iterator.empty
     protected var timer: Option[Timer] = None
     protected var lastUpdate: UpdateData = new UpdateData(UpdateAction.BEGIN, gameState)
-    protected val invoker: CommandInvoker = CommandInvoker.create()
+    protected val invoker: CommandInvoker = CommandInvoker.create
 
     override def requestUpdate(): Unit = {
         notifyObserversAndSaveUpdate(lastUpdate)
@@ -45,14 +45,14 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
         invoker.redo()
     }
 
-    override def nextPlayerName(): Option[String] = {
+    override def nextPlayerName: Option[String] = {
         gameState.playerCount() match {
             case c if c < maxPlayerCount => Some(Player.baseName + (gameState.playerCount + 1).toString)
             case _ => None
         }
     }
 
-    override def maxPlayerCount(): Int = Game.maxPlayerCount
+    override def maxPlayerCount: Int = Game.maxPlayerCount
 
     override def onHelp(): Unit = {
         notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.SHOW_HELP, gameState))
@@ -78,7 +78,7 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
         val correctAnswer = currentQuestion.correctAnswer
         var (player: Option[Player], userInput: Int) = input match {
             case x if 0 until 5 contains x => (Some(gameState.players.head), input)
-            case x if (6 until 10 contains x) && gameState.players.lengthCompare(1) > 0=> (Some(gameState.players(1)), input-5) // FIXME magic number -> local mp will be removed anyway
+            case x if (6 until 10 contains x) && gameState.players.lengthCompare(1) > 0 => (Some(gameState.players(1)), input-5) // FIXME magic number -> local mp will be removed anyway
             case _ => (None, input)
         }
 
@@ -107,7 +107,7 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
     protected def addPlayer(name: Option[String]): String = {
         var playerName = name match {
             case Some(n) => n
-            case None => nextPlayerName().getOrElse("<unknown>") // will not be used if None
+            case None => nextPlayerName.getOrElse("<unknown>") // will not be used if None
         }
 
         if (gameState.playerCount == Game.maxPlayerCount) {
@@ -171,8 +171,8 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
 
                 newTime match {
                     case Some(time) =>
-                      gameState.currentQuestionTime = newTime
-                      notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.TIMER_UPDATE, gameState))
+                        gameState.currentQuestionTime = newTime
+                        notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.TIMER_UPDATE, gameState))
                     case _ =>
                 }
             }

@@ -80,7 +80,7 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
                     updateParam.getState.currentQuestionTime.get
                 )
                 inMenu = false
-                inGame = true;
+                inGame = true
             case UpdateAction.TIMER_UPDATE =>
                 displayGamePretty(
                     updateParam.getState.currentQuestion.get,
@@ -124,7 +124,7 @@ class TUI (controller: Controller) extends UI with Observer with LazyLogging {
                 case "U" => controller.onPlayerActionRedo()
                 case _ =>
                     logger.info("Unknown command")
-                    displayMenu()
+                    displayMenu
             }
         } catch {
             case e: ControllerException => logger.error(e.getMessage)

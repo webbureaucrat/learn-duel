@@ -77,7 +77,7 @@ class GUI (controller: Controller, latch: CountDownLatch) extends JFXApp with UI
         this.stage = new MenuStage(
             _ => controller.onStartGame(),
             _ => controller.onHelp(),
-            (controller.getPlayerNames, controller.nextPlayerName()),
+            (controller.getPlayerNames, controller.nextPlayerName),
             (name) => controller.onAddPlayer(Some(name)),
             controller.onRemovePlayer
         )

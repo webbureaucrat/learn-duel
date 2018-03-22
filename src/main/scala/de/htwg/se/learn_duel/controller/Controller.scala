@@ -5,9 +5,9 @@ import de.htwg.se.learn_duel.controller.impl.{Controller => ControllerImpl}
 import de.htwg.se.learn_duel.model.{Game, Resettable}
 
 trait Controller extends Observable with Resettable {
-    def nextPlayerName(): Option[String]
+    def nextPlayerName: Option[String]
     def getPlayerNames: List[String]
-    def maxPlayerCount(): Int
+    def maxPlayerCount: Int
     def requestUpdate(): Unit
     def reset(): Unit
     def onAddPlayer(name: Option[String]): Unit

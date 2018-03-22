@@ -11,7 +11,7 @@ trait CommandInvoker {
 }
 
 object CommandInvoker {
-    def create(): CommandInvokerImpl = {
+    def create: CommandInvokerImpl = {
         CommandInvokerImpl()
     }
 }
