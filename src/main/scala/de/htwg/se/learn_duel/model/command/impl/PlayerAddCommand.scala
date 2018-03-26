@@ -7,17 +7,17 @@ case class PlayerAddCommand(
     addPlayer: Function[Option[String], String],
     removePlayer: Function[String, Unit]
 ) extends Command {
-    var actualName: String = ""
+  var actualName: String = ""
 
-    override def execute(): Unit = {
-        actualName = addPlayer(name)
-    }
+  override def execute(): Unit = {
+    actualName = addPlayer(name)
+  }
 
-    override def undo(): Unit = {
-        removePlayer(actualName)
-    }
+  override def undo(): Unit = {
+    removePlayer(actualName)
+  }
 
-    override def redo(): Unit = {
-        execute()
-    }
+  override def redo(): Unit = {
+    execute()
+  }
 }
