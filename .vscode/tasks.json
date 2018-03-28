@@ -27,7 +27,7 @@
         {
             "label": "run",
             "type": "shell",
-            "command": "sbt 'run -Dhttps.port=9443 -Dhttp.port=disabled'"
+            "command": "sbt run"
         }
     ]
 }
