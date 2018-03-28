@@ -44,3 +44,9 @@ project/.sbtserver
 
 # Application
 learn-duel.log
+
+#Ensime
+.ensime
+.ensime_cache/
+ensime-langserver.log
+pc.stdout.log
