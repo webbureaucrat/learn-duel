@@ -31,6 +31,11 @@ object GUI {
     // run GUI on its own thread
     Future {
       gui.main(Array())
+    } recover {
+      case _ =>
+        if (latch.getCount() != 0) {
+          latch.countDown();
+        }
     }
 
     // wait for initialization of JFXApp to be done
