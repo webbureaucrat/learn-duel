@@ -50,3 +50,7 @@ learn-duel.log
 .ensime_cache/
 ensime-langserver.log
 pc.stdout.log
+
+#VS Code settings file
+.vscode/settings.json
+
