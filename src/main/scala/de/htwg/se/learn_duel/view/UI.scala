@@ -5,7 +5,7 @@ import java.util.concurrent.CountDownLatch
 import de.htwg.se.learn_duel.Observer
 import de.htwg.se.learn_duel.controller.Controller
 import de.htwg.se.learn_duel.model.{Player, Question}
-import de.htwg.se.learn_duel.view.impl.{TUI => TUIImpl}
+import de.htwg.se.learn_duel.view.impl.{TUI => TUIImpl, RestUi => RestUiImpl}
 import de.htwg.se.learn_duel.view.impl.gui.{GUI => GUIImpl}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,12 +33,18 @@ object GUI {
       gui.main(Array())
     } recover {
       case _ =>
-        if (latch.getCount() != 0) {
-          latch.countDown();
+        if (latch.getCount != 0) {
+          latch.countDown()
         }
     }
 
     // wait for initialization of JFXApp to be done
     latch.await()
+  }
+}
+
+object RestUi {
+  def create(controller: Controller): RestUiImpl = {
+    new RestUiImpl(controller)
   }
 }
