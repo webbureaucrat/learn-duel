@@ -3,6 +3,8 @@ FROM bigtruedata/sbt
 ENV DOWNLOAD www.h2database.com/h2-2018-03-18.zip
 ENV DATA_DIR /opt/h2-data
 
+# install javafx
+RUN apt-get update && apt-get install -y --no-install-recommends openjfx && rm -rf /var/lib/apt/lists/*
 
 # install h2 database
 RUN curl ${DOWNLOAD} -o h2.zip \
@@ -24,6 +26,9 @@ RUN echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main" | 
     tee /etc/apt/sources.list.d/mongodb-org-3.6.list && \
     apt-get install -y mongodb
 
+# install Xvfb
+RUN apt-get install -y xvfb
+
 RUN service mongodb start
 
-CMD ["apt-get", "update"]
+CMD ["pwd"]
