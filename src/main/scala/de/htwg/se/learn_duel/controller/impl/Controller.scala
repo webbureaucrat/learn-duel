@@ -6,12 +6,18 @@ import com.google.inject.Inject
 import de.htwg.se.learn_duel.controller.impl.exceptions._
 import de.htwg.se.learn_duel.controller.{Controller => ControllerTrait}
 import de.htwg.se.learn_duel.model.command.CommandInvoker
-import de.htwg.se.learn_duel.model.command.impl.{
-  PlayerAddCommand,
-  PlayerRemoveCommand
-}
-import de.htwg.se.learn_duel.model.{Game, Player, Question}
+import de.htwg.se.learn_duel.model.command.impl.{PlayerAddCommand, PlayerRemoveCommand}
+import de.htwg.se.learn_duel.model.database.{PlayerDAO, QuestionDAO, ResultDAO}
+import de.htwg.se.learn_duel.model.{Game, Player, Question, Result}
 import de.htwg.se.learn_duel.{UpdateAction, UpdateData}
+import slick.jdbc.H2Profile.api._
+import slick.jdbc.meta.MTable
+import slick._
+import slick.jdbc.H2Profile
+
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 
 class Controller @Inject()(gameState: Game) extends ControllerTrait {
   protected var questionIter: Iterator[Question] = Iterator.empty
@@ -19,6 +25,26 @@ class Controller @Inject()(gameState: Game) extends ControllerTrait {
   protected var lastUpdate: UpdateData =
     new UpdateData(UpdateAction.BEGIN, gameState)
   protected val invoker: CommandInvoker = CommandInvoker.create
+
+  // database connection (could be injected later, but as this will not be merged any time soon it would be
+  // wasted time to do this right now)
+  val db =  Database.forURL("jdbc:h2:~/learn-duel", user = "SA")
+
+  // create schema if it doesn't exist
+  val tables = List(
+    TableQuery[ResultDAO],
+    TableQuery[PlayerDAO],
+    TableQuery[QuestionDAO]
+  )
+
+  val existingTables = db.run(MTable.getTables)
+  val createSchemaFuture = existingTables.flatMap( v => {
+    val names = v.map(mt => mt.name.name)
+    val createIfNotExist = tables.filter( table =>
+      (!names.contains(table.baseTableRow.tableName))).map(_.schema.create)
+    db.run(DBIO.sequence(createIfNotExist))
+  })
+  Await.result(createSchemaFuture, Duration.Inf)
 
   override def requestUpdate(): Unit = {
     notifyObserversAndSaveUpdate(lastUpdate)
@@ -113,6 +139,81 @@ class Controller @Inject()(gameState: Game) extends ControllerTrait {
     }
   }
   // scalastyle:on
+
+  override def onSaveResult(): Unit = {
+    val results = TableQuery[ResultDAO]
+    val players = TableQuery[PlayerDAO]
+    val questions = TableQuery[QuestionDAO]
+
+    val maxResultId = Await.result(db.run(results.map(_.id).max.result), Duration.Inf)
+    val maxPlayerId = Await.result(db.run(players.map(_.id).max.result), Duration.Inf)
+
+    val resultId = maxResultId.getOrElse(0)
+    val playerId = maxPlayerId.getOrElse(0)
+
+    val addPlayers = gameState.players.map(p => {
+      players += (0, p.name, p.points, resultId + 1)
+    })
+
+    val firstPlayerCorrectQuestions = gameState.players.apply(0).correctAnswers.map(a => (a, true))
+    val firstPlayerWrongQuestions = gameState.players.apply(0).wrongAnswers.map(a => (a, false))
+    val addFirstPlayerQuestions = (firstPlayerCorrectQuestions ::: firstPlayerWrongQuestions).map(q => {
+      questions += (0, q._1.text, q._2, playerId + 1)
+    })
+
+    gameState.playerCount() match {
+      case 2 => {
+        val secondPlayerCorrectQuestions = gameState.players.apply(1).correctAnswers.map(a => (a, true))
+        val secondPlayerWrongQuestions = gameState.players.apply(1).wrongAnswers.map(a => (a, false))
+        val addSecondPlayerQuestions = (secondPlayerCorrectQuestions ::: secondPlayerWrongQuestions).map(q => {
+          questions += (0, q._1.text, q._2, playerId + 2)
+        })
+
+        db.run(DBIO.seq(
+          results += (0),
+          DBIO.sequence(addPlayers),
+          DBIO.sequence(addFirstPlayerQuestions),
+          DBIO.sequence(addSecondPlayerQuestions)
+        ))
+      }
+      case _ => {
+        db.run(DBIO.seq(
+          results += (0),
+          DBIO.sequence(addPlayers),
+          DBIO.sequence(addFirstPlayerQuestions)
+        ))
+      }
+    }
+  }
+
+  override def onLoadResults(): Unit = {
+    val results = TableQuery[ResultDAO]
+    val players = TableQuery[PlayerDAO]
+    val questions = TableQuery[QuestionDAO]
+
+    val resultQuery = for (
+      r <- results;
+      p <- players if r.id === p.resultId;
+      q <- questions if p.id === q.playerId
+    ) yield (r.id, p.id, p.name, p.points, q.text, q.correctlyAnswered)
+
+    val resF = db.run(resultQuery.result)
+      .map(result => result.groupBy(_._1).map(groupedResult => {
+        val filteredGroupedResult = groupedResult._2.map(r => (r._3, r._4)).distinct
+        val questions = groupedResult._2.groupBy(_._2).map(r => r._2.map(q => (q._5, q._6)).toList)
+
+        val playerList = filteredGroupedResult.zip(questions).map(values => {
+          val correctAnswers = values._2.filter(q => q._2).map(q => q._1)
+          val wrongAnswers = values._2.filter(q => !q._2).map(q => q._1)
+          Player.create(values._1._1, values._1._2, correctAnswers, wrongAnswers)
+        }).toList
+
+        Result.create(playerList)
+      }))
+    val res = Await.result(resF, Duration.Inf).toList
+
+    notifyObserversAndSaveUpdate(new UpdateData(UpdateAction.SHOW_PREVIOUS_RESULTS, gameState, Some(res)))
+  }
 
   protected def addPlayer(name: Option[String]): String = {
     var playerName = name match {

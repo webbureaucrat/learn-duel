@@ -4,7 +4,7 @@ import java.util.concurrent.CountDownLatch
 
 import de.htwg.se.learn_duel.Observer
 import de.htwg.se.learn_duel.controller.Controller
-import de.htwg.se.learn_duel.model.{Player, Question}
+import de.htwg.se.learn_duel.model.{Player, Question, Result}
 import de.htwg.se.learn_duel.view.impl.{TUI => TUIImpl}
 import de.htwg.se.learn_duel.view.impl.gui.{GUI => GUIImpl}
 
@@ -14,7 +14,8 @@ import scala.concurrent.Future
 trait UI extends Observer {
   def displayMenu(): Unit
   def displayGame(currentQuestion: Question, multiplayer: Boolean): Unit
-  def displayResult(players: List[Player]): Unit
+  def displayResult(result: Result): Unit
+  def displayPreviousResults(results: List[Result]) : Unit
 }
 
 object TUI {

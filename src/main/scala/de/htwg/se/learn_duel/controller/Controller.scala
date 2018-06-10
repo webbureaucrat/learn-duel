@@ -2,7 +2,7 @@ package de.htwg.se.learn_duel.controller
 
 import de.htwg.se.learn_duel.Observable
 import de.htwg.se.learn_duel.controller.impl.{Controller => ControllerImpl}
-import de.htwg.se.learn_duel.model.{Game, Resettable}
+import de.htwg.se.learn_duel.model.{Game, Resettable, Result}
 
 trait Controller extends Observable with Resettable {
   def nextPlayerName: Option[String]
@@ -17,7 +17,9 @@ trait Controller extends Observable with Resettable {
   def onHelp(): Unit
   def onStartGame(): Unit
   def onClose(): Unit
-  def onAnswerChosen(input: Int)
+  def onAnswerChosen(input: Int): Unit
+  def onSaveResult(): Unit
+  def onLoadResults(): Unit
 }
 
 object Controller {

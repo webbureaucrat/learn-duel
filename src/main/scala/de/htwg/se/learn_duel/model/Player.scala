@@ -1,6 +1,9 @@
 package de.htwg.se.learn_duel.model
 
-import de.htwg.se.learn_duel.model.impl.{Player => PlayerImpl}
+import de.htwg.se.learn_duel.model.impl.{
+  Player => PlayerImpl,
+  Question => QuestionImpl
+}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
@@ -16,6 +19,12 @@ object Player {
   val baseName = "Player"
   def create(name: String): PlayerImpl = {
     PlayerImpl(name)
+  }
+
+  def create(name: String, points: Int, correctAnswers: List[String], wrongAnswers: List[String]): PlayerImpl = {
+    val correct = correctAnswers.map(a => QuestionImpl(-1, a, 0, List.empty, -1, -1))
+    val wrong = wrongAnswers.map(a => QuestionImpl(-1, a, 0, List.empty, -1, -1))
+    PlayerImpl(name, points, correct, wrong)
   }
 
   implicit val playerWrites: Writes[Player] = new Writes[Player] {

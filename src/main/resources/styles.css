@@ -56,14 +56,19 @@
     -fx-cursor: hand;
 }
 
-.help-button {
+.menu-buttons {
+    -fx-alignment: center;
+    -fx-spacing: 5px;
+}
+
+.load-button, .help-button {
     -fx-min-width: 430px;
     -fx-min-height: 30px;
     -fx-background-color: rgb(221,221,221);
     -fx-cursor: hand;
 }
 
-.add-remove-buttons:hover, .help-button:hover {
+.load-button:hover, .add-remove-buttons:hover, .help-button:hover {
     -fx-background-color: lightgray;
 }
 
@@ -155,14 +160,19 @@
     -fx-font-size: 14px;
 }
 
-.back-button {
+.result-buttons {
+    -fx-alignment: center;
+    -fx-spacing: 5px;
+}
+
+.save-button, .back-button {
     -fx-min-width: 430px;
     -fx-min-height: 50px;
     -fx-background-color: rgb(221,221,221);
     -fx-cursor: hand;
 }
 
-.back-button:hover {
+.save-button:hover, .back-button:hover {
     -fx-background-color: lightgray;
 }
 
