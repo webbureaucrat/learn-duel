@@ -15,7 +15,8 @@ class MenuStage(
     helpAction: EventHandler[ActionEvent],
     playerInfo: (List[String], Option[String]),
     playerAddAction: Function[String, Unit],
-    playerRemoveAction: Function[String, Unit]
+    playerRemoveAction: Function[String, Unit],
+    previousResultsAction: Function0[Unit]
 ) extends PrimaryStage {
   title.value = "Learn Duel Menu"
   resizable = false
@@ -99,13 +100,25 @@ class MenuStage(
       }
       children += playerContainer
 
-      val helpButton: Button = new Button {
-        text = "Help"
-        onAction = helpAction
-        styleClass += "help-button"
-      }
+      val buttonContainer = new VBox {
+        styleClass += "menu-buttons"
+        val previousResultsButton: Button = new Button {
+          text = "Show previous results"
+          onAction = previousResultsAction
+          styleClass += "load-button"
+        }
 
-      children += helpButton
+        children += previousResultsButton
+
+        val helpButton: Button = new Button {
+          text = "Help"
+          onAction = helpAction
+          styleClass += "help-button"
+        }
+
+        children += helpButton
+      }
+      children += buttonContainer
     }
   }
 }

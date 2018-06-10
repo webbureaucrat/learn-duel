@@ -5,7 +5,7 @@ import java.io.BufferedReader
 import com.typesafe.scalalogging.LazyLogging
 import de.htwg.se.learn_duel.{Observer, UpdateAction, UpdateData}
 import de.htwg.se.learn_duel.controller.{Controller, ControllerException}
-import de.htwg.se.learn_duel.model.{Player, Question}
+import de.htwg.se.learn_duel.model.{Player, Question, Result}
 import de.htwg.se.learn_duel.view.UI
 
 class TUI(controller: Controller) extends UI with Observer with LazyLogging {
@@ -26,6 +26,7 @@ class TUI(controller: Controller) extends UI with Observer with LazyLogging {
     logger.info("a [name] => add player")
     logger.info("r [name] => remove player")
     logger.info("h => show help")
+    logger.info("l => load previous results")
     logger.info("q => exit")
     logger.info("")
   }
@@ -38,10 +39,10 @@ class TUI(controller: Controller) extends UI with Observer with LazyLogging {
     }
   }
 
-  override def displayResult(players: List[Player]): Unit = {
+  override def displayResult(result: Result): Unit = {
     logger.info("")
     logger.info("RESULT:")
-    players.foreach(p => {
+    result.players.foreach(p => {
       logger.info("Player '" + p.name + "':")
       logger.info("Points: " + p.points)
       logger.info("Correct answers:")
@@ -52,12 +53,15 @@ class TUI(controller: Controller) extends UI with Observer with LazyLogging {
       logger.info("Wrong answers:")
       p.wrongAnswers.foreach(q => {
         logger.info("\t" + q.text)
-        val correctAnswer = q.answers.find(a => a.id == q.correctAnswer).get
-        logger.info("\tcorrect answer is: " + correctAnswer.text)
+        val correctAnswer = q.answers.find(a => a.id == q.correctAnswer)
+        if (correctAnswer.isDefined) {
+          val answer = correctAnswer.get
+          logger.info("\tcorrect answer is: " + answer.text)
+        }
       })
     })
 
-    val player = players.max[Player] {
+    val player = result.players.max[Player] {
       case (p1: Player, p2: Player) =>
         p1.points.compareTo(p2.points)
     }
@@ -67,10 +71,24 @@ class TUI(controller: Controller) extends UI with Observer with LazyLogging {
     logger.info("")
   }
 
+  override def displayPreviousResults(results: List[Result]): Unit = {
+    if (results.isEmpty) {
+      logger.info("No previous results")
+    } else {
+      logger.info("")
+      logger.info("Previous results:")
+
+      results.foreach{r => {
+        displayResult(r)
+        logger.info("")
+      }}
+    }
+  }
+
   // scalastyle:off
   override def update(updateParam: UpdateData): Unit = {
     updateParam.getAction match {
-      case UpdateAction.BEGIN             => displayMenu()
+      case UpdateAction.BEGIN => displayMenu()
       case UpdateAction.CLOSE_APPLICATION => stopProcessingInput = true
       case UpdateAction.SHOW_HELP =>
         logger.info(updateParam.getState.helpText.mkString("\n\n"))
@@ -90,7 +108,9 @@ class TUI(controller: Controller) extends UI with Observer with LazyLogging {
           updateParam.getState.currentQuestionTime.get
         )
       case UpdateAction.SHOW_RESULT =>
-        displayResult(updateParam.getState.players)
+        displayResult(Result.create(updateParam.getState.players))
+      case UpdateAction.SHOW_PREVIOUS_RESULTS =>
+        displayPreviousResults(updateParam.getResults.getOrElse(List.empty))
       case _ =>
     }
   }
@@ -124,6 +144,7 @@ class TUI(controller: Controller) extends UI with Observer with LazyLogging {
             controller.onRemovePlayer(name)
           }
         case "h" => controller.onHelp()
+        case "l" => controller.onLoadResults()
         case "u" => controller.onPlayerActionUndo()
         case "U" => controller.onPlayerActionRedo()
         case _ =>
@@ -153,6 +174,7 @@ class TUI(controller: Controller) extends UI with Observer with LazyLogging {
   protected def processResultInput(line: String): Unit = {
     line match {
       case "q" => controller.onClose()
+      case "s" => controller.onSaveResult()
       case _   => logger.info("Unknown command")
     }
   }
@@ -166,5 +188,4 @@ class TUI(controller: Controller) extends UI with Observer with LazyLogging {
     logger.info("Time remaining: " + timeRemaining + "s")
     logger.info("")
   }
-
 }

@@ -6,7 +6,7 @@ import javafx.application.Platform
 
 import com.typesafe.scalalogging.LazyLogging
 import de.htwg.se.learn_duel.controller.{Controller, ControllerException}
-import de.htwg.se.learn_duel.model.{Player, Question}
+import de.htwg.se.learn_duel.model.{Player, Question, Result}
 import de.htwg.se.learn_duel.view.UI
 import de.htwg.se.learn_duel.{Observer, UpdateAction, UpdateData}
 
@@ -72,7 +72,9 @@ class GUI(controller: Controller, latch: CountDownLatch)
             case _ =>
           }
         case UpdateAction.SHOW_RESULT =>
-          displayResult(updateParam.getState.players)
+          displayResult(Result.create(updateParam.getState.players))
+        case UpdateAction.SHOW_PREVIOUS_RESULTS =>
+          displayPreviousResults(updateParam.getResults.getOrElse(List.empty))
         case _ =>
       }
     }
@@ -85,7 +87,8 @@ class GUI(controller: Controller, latch: CountDownLatch)
       _ => controller.onHelp(),
       (controller.getPlayerNames, controller.nextPlayerName),
       (name) => controller.onAddPlayer(Some(name)),
-      controller.onRemovePlayer
+      controller.onRemovePlayer,
+      controller.onLoadResults
     )
   }
 
@@ -97,7 +100,11 @@ class GUI(controller: Controller, latch: CountDownLatch)
     )
   }
 
-  override def displayResult(players: List[Player]): Unit = {
-    this.stage = new ResultStage(players, controller.reset)
+  override def displayResult(result: Result): Unit = {
+    this.stage = new ResultStage(result, controller.onSaveResult, controller.reset)
+  }
+
+  override def displayPreviousResults(results: List[Result]): Unit = {
+
   }
 }
