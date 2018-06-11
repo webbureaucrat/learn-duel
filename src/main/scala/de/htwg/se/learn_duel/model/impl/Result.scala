@@ -5,5 +5,5 @@ import de.htwg.se.learn_duel.model.{
     Result => ResultTrait
 }
 
-case class Result(var players: List[PlayerTrait]) extends ResultTrait {
+case class Result(var dummy: String, var players: List[PlayerTrait]) extends ResultTrait {
 }
