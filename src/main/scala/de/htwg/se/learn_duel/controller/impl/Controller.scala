@@ -6,12 +6,10 @@ import com.google.inject.Inject
 import de.htwg.se.learn_duel.controller.impl.exceptions._
 import de.htwg.se.learn_duel.controller.{Controller => ControllerTrait}
 import de.htwg.se.learn_duel.model.command.CommandInvoker
-import de.htwg.se.learn_duel.model.command.impl.{
-  PlayerAddCommand,
-  PlayerRemoveCommand
-}
+import de.htwg.se.learn_duel.model.command.impl.{PlayerAddCommand, PlayerRemoveCommand}
 import de.htwg.se.learn_duel.model.{Game, Player, Question}
 import de.htwg.se.learn_duel.{UpdateAction, UpdateData}
+import play.api.libs.json.Json
 
 class Controller @Inject()(gameState: Game) extends ControllerTrait {
   protected var questionIter: Iterator[Question] = Iterator.empty
@@ -241,5 +239,46 @@ class Controller @Inject()(gameState: Game) extends ControllerTrait {
   protected def notifyObserversAndSaveUpdate(data: UpdateData): Unit = {
     lastUpdate = data
     notifyObservers(data)
+  }
+
+  override def receive: Receive = {
+    case "onHelp" => {
+      onHelp()
+      // test to see if concurrent requests to the same route are working
+      // timeout in rest ui must be raised for this
+      // tested with two different browser instances -> must be separate connections
+      //println(LocalTime.now() + " - start sleep")
+      //Thread.sleep(10000)
+      //println(LocalTime.now() + " - end sleep")
+      sender ! Json.toJson(gameState.helpText)
+    }
+    case "onStartGame" => {
+      onStartGame()
+      sender ! Json.toJson(gameState)
+    }
+    case "reset" => {
+      //reset()
+      onAddPlayer(Some("blaaa"))
+      sender ! Json.toJson(gameState)
+    }
+    case "maxPlayerCount" => {
+      sender ! Json.toJson(maxPlayerCount)
+    }
+    case ("onAnswerChosen", id: Int) => {
+      onAnswerChosen(id)
+      sender ! Json.toJson(gameState)
+    }
+    case "onAddPlayer" => {
+      onAddPlayer(None)
+      sender ! Json.toJson(gameState.players)
+    }
+    case ("onAddPlayer", playerName: String) => {
+      onAddPlayer(Some(playerName))
+      sender ! Json.toJson(gameState.players)
+    }
+    case ("onRemovePlayer", playerName: String) => {
+      onRemovePlayer(playerName)
+      sender ! Json.toJson(gameState.players)
+    }
   }
 }

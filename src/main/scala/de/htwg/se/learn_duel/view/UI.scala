@@ -42,9 +42,3 @@ object GUI {
     latch.await()
   }
 }
-
-object RestUi {
-  def create(controller: Controller): RestUiImpl = {
-    new RestUiImpl(controller)
-  }
-}

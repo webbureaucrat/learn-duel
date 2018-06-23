@@ -1,5 +1,6 @@
 package de.htwg.se.learn_duel.model
 
+import akka.actor.Actor
 import de.htwg.se.learn_duel.model.impl.{Game => GameImpl}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
