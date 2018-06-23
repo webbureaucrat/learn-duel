@@ -63,8 +63,7 @@ class RestUi @Inject()(injector: Injector, implicit val system: ActorSystem) {
           } ~
           path("game") {
             extractClientIP { ip =>
-              val random = Random.nextInt()
-              val future = controllerActorFactory.getInstance(random.toString()).ask("onStartGame")
+              val future = controllerActorFactory.getInstance(ip.toString()).ask("onStartGame")
               onSuccess(future) ( res =>
                 complete(
                   HttpEntity(ContentTypes.`application/json`, res.toString)
