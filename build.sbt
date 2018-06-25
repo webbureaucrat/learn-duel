@@ -15,6 +15,13 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
 libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.0.0"
 
+
+enablePlugins(GatlingPlugin)
+libraryDependencies += "io.gatling.highcharts" % "gatling-charts-highcharts" % "2.3.0" % "test"
+
+libraryDependencies += "io.gatling"            % "gatling-test-framework"    % "2.3.0" % "test"
+
+
 unmanagedSourceDirectories in Compile := (unmanagedSourceDirectories in Compile).value
   .filter {
     _.exists
@@ -26,3 +33,4 @@ unmanagedSourceDirectories in Test := (unmanagedSourceDirectories in Test).value
 coverageExcludedPackages := ".*view.*;.*GuiceModule.*;.*LearnDuel.*"
 coverageEnabled := true
 coverageHighlighting := true
+
