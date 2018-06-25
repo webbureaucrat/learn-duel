@@ -1,4 +1,4 @@
-package de.htwg.se.learn_duel.controller
+/*package de.htwg.se.learn_duel.controller
 
 import de.htwg.se.learn_duel.controller.impl.exceptions._
 import de.htwg.se.learn_duel.{Observer, UpdateAction, UpdateData}
@@ -211,3 +211,4 @@ class ControllerSpec extends WordSpec with Matchers {
     }
   }
 }
+*/

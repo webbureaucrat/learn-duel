@@ -8,13 +8,11 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import com.google.inject.{Guice, Inject, Injector}
-import de.htwg.se.learn_duel.GuiceModule
+import com.google.inject.{Inject, Injector}
 import de.htwg.se.learn_duel.controller.ControllerActorFactory
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContextExecutor, Future}
-import scala.util.Random
+import scala.concurrent.{ExecutionContextExecutor, Future}
 
 class RestUi @Inject()(injector: Injector, implicit val system: ActorSystem) {
 
@@ -22,8 +20,8 @@ class RestUi @Inject()(injector: Injector, implicit val system: ActorSystem) {
   // needed for the future flatMap/onComplete in the end
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-  val controllerActorFactory = injector.getInstance(classOf[ControllerActorFactory])
-  implicit val timeout: Timeout = Timeout(5.seconds) // used for akka ask pattern
+  private val controllerActorFactory = injector.getInstance(classOf[ControllerActorFactory])
+  implicit private val timeout: Timeout = Timeout(5.seconds) // used for akka ask pattern
 
   val route: Route =
     get {
@@ -47,107 +45,112 @@ class RestUi @Inject()(injector: Injector, implicit val system: ActorSystem) {
             * GET         /rest/v1/maxPlayerCount                     Controller.getMaxPlayerCount
             */
 
-          complete (
+          complete(
             HttpEntity(ContentTypes.`text/html(UTF-8)`, "<p>Path overview not yet implemented</p>")
           )
         } ~
+        path("register") {
+          val id = java.util.UUID.randomUUID().toString
+          controllerActorFactory.createInstance(id)
+          complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, id))
+        } ~
+        pathPrefix(Segment) { id =>
           path("help") {
-            extractClientIP { ip =>
-              val future = controllerActorFactory.getInstance(ip.toString()).ask("onHelp")
-              onSuccess(future) ( res =>
-                complete(
-                  HttpEntity(ContentTypes.`application/json`, res.toString)
-                )
+            val actor = controllerActorFactory.getInstance(id)
+            actor match {
+              case Some(controller) => onComplete(controller.ask("onHelp")) (res =>
+                complete(HttpEntity(ContentTypes.`application/json`, res.toString))
               )
+              case None => complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "ID not found"))
+            }
+          } ~
+          path("start") {
+            val actor = controllerActorFactory.getInstance(id)
+            actor match {
+              case Some(controller) => onComplete(controller.ask("onStartGame")) (res =>
+                complete(HttpEntity(ContentTypes.`application/json`, res.toString))
+              )
+              case None => complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "ID not found"))
             }
           } ~
           path("game") {
-            extractClientIP { ip =>
-              val future = controllerActorFactory.getInstance(ip.toString()).ask("onStartGame")
-              onSuccess(future) ( res =>
-                complete(
-                  HttpEntity(ContentTypes.`application/json`, res.toString)
-                )
+            val actor = controllerActorFactory.getInstance(id)
+            actor match {
+              case Some(controller) => onComplete(controller.ask("onGetGame")) (res =>
+                complete(HttpEntity(ContentTypes.`application/json`, res.toString))
               )
+              case None => complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "ID not found"))
             }
           } ~
           path("cleanState") {
-            extractClientIP { ip =>
-              val future = controllerActorFactory.getInstance(ip.toString()).ask("reset")
-              onSuccess(future) ( res =>
-                complete(
-                  HttpEntity(ContentTypes.`application/json`, res.toString)
-                )
+            val actor = controllerActorFactory.getInstance(id)
+            actor match {
+              case Some(controller) => onComplete(controller.ask("reset")) (res =>
+                complete(HttpEntity(ContentTypes.`application/json`, res.toString))
               )
+              case None => complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "ID not found"))
             }
           } ~
           path("maxPlayerCount") {
-            extractClientIP { ip =>
-              val future = controllerActorFactory.getInstance(ip.toString()).ask("maxPlayerCount")
-              onSuccess(future) ( res =>
-                complete(
-                  HttpEntity(ContentTypes.`application/json`, res.toString)
-                )
+            val actor = controllerActorFactory.getInstance(id)
+            actor match {
+              case Some(controller) => onComplete(controller.ask("maxPlayerCount")) (res =>
+                complete(HttpEntity(ContentTypes.`application/json`, res.toString))
               )
+              case None => complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "ID not found"))
             }
           }
+        }
       }
     } ~
-      post {
-        pathPrefix("rest" / "v1") {
-          path("answer" / IntNumber) { id => {
-            extractClientIP { ip =>
-              val future = controllerActorFactory.getInstance(ip.toString()).ask(("onAnswerChosen", id))
-              onSuccess(future) ( res =>
-                complete(
-                  HttpEntity(ContentTypes.`application/json`, res.toString)
-                )
-              )
-            }
+    post {
+      pathPrefix("rest" / "v1" / Segment) { id =>
+        path("answer" / IntNumber) { answerId => {
+          val actor = controllerActorFactory.getInstance(id)
+          actor match {
+            case Some(controller) => onComplete(controller.ask(("onAnswerChosen", answerId))) (res =>
+              complete(HttpEntity(ContentTypes.`application/json`, res.toString))
+            )
+            case None => complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "ID not found"))
           }
-          }
-        }
-      } ~
-      put {
-        pathPrefix("rest" / "v1") {
-          path("player") {
-            extractClientIP { ip =>
-              val future = controllerActorFactory.getInstance(ip.toString()).ask("onAddPlayer")
-              onSuccess(future) ( res =>
-                complete(
-                  HttpEntity(ContentTypes.`application/json`, res.toString)
-                )
-              )
-            }
-          } ~
-            path("player" / Segment) { name => {
-              extractClientIP { ip =>
-                val future = controllerActorFactory.getInstance(ip.toString()).ask(("onAddPlayer", name))
-                onSuccess(future) ( res =>
-                  complete(
-                    HttpEntity(ContentTypes.`application/json`, res.toString)
-                  )
-                )
-              }
-            }
-            }
-        }
-      } ~
-      delete {
-        pathPrefix("rest" / "v1") {
-          path("player" / Segment) { name => {
-            extractClientIP { ip =>
-              val future = controllerActorFactory.getInstance(ip.toString()).ask(("onRemovePlayer", name))
-              onSuccess(future) ( res =>
-                complete(
-                  HttpEntity(ContentTypes.`application/json`, res.toString)
-                )
-              )
-            }
-          }
-          }
-        }
+        }}
       }
+    } ~
+    put {
+      pathPrefix("rest" / "v1" / Segment) { id =>
+        path("player") {
+          val actor = controllerActorFactory.getInstance(id)
+          actor match {
+            case Some(controller) => onComplete(controller.ask("onAddPlayer")) (res =>
+              complete(HttpEntity(ContentTypes.`application/json`, res.toString))
+            )
+            case None => complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "ID not found"))
+          }
+        } ~
+        path("player" / Segment) { name => {
+          val actor = controllerActorFactory.getInstance(id)
+          actor match {
+            case Some(controller) => onComplete(controller.ask(("onAddPlayer", name))) (res =>
+              complete(HttpEntity(ContentTypes.`application/json`, res.toString))
+            )
+            case None => complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "ID not found"))
+          }
+        }}
+      }
+    } ~
+    delete {
+      pathPrefix("rest" / "v1" / Segment) { id =>
+        path("player" / Segment) { name => {
+          val actor = controllerActorFactory.getInstance(id)
+          actor match {
+            case Some(controller) => onComplete(controller.ask(("onRemovePlayer", name)))(res =>
+              complete(HttpEntity(ContentTypes.`application/json`, res.toString))
+            )
+            case None => complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "ID not found"))
+          }
+        }}
+      }
+    }
 
   val bindingFuture: Future[Http.ServerBinding] =
     Http().bindAndHandle(route, "localhost", 8080)

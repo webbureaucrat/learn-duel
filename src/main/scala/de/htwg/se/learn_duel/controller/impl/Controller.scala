@@ -241,8 +241,9 @@ class Controller @Inject()(gameState: Game) extends ControllerTrait {
     notifyObservers(data)
   }
 
+  // scalastyle:off
   override def receive: Receive = {
-    case "onHelp" => {
+    case "onHelp" =>
       onHelp()
       // test to see if concurrent requests to the same route are working
       // timeout in rest ui must be raised for this
@@ -251,34 +252,44 @@ class Controller @Inject()(gameState: Game) extends ControllerTrait {
       //Thread.sleep(10000)
       //println(LocalTime.now() + " - end sleep")
       sender ! Json.toJson(gameState.helpText)
-    }
-    case "onStartGame" => {
-      onStartGame()
+    case "onStartGame" =>
+      try {
+        onStartGame()
+        sender ! Json.toJson(gameState)
+      } catch {
+        case e: Throwable => sender ! Json.toJson(e.toString)
+      }
+    case "onGetGame" =>
       sender ! Json.toJson(gameState)
-    }
-    case "reset" => {
-      //reset()
-      onAddPlayer(Some("blaaa"))
+    case "reset" =>
+      reset()
       sender ! Json.toJson(gameState)
-    }
-    case "maxPlayerCount" => {
+    case "maxPlayerCount" =>
       sender ! Json.toJson(maxPlayerCount)
-    }
-    case ("onAnswerChosen", id: Int) => {
+    case ("onAnswerChosen", id: Int) =>
       onAnswerChosen(id)
       sender ! Json.toJson(gameState)
-    }
-    case "onAddPlayer" => {
-      onAddPlayer(None)
-      sender ! Json.toJson(gameState.players)
-    }
-    case ("onAddPlayer", playerName: String) => {
-      onAddPlayer(Some(playerName))
-      sender ! Json.toJson(gameState.players)
-    }
-    case ("onRemovePlayer", playerName: String) => {
-      onRemovePlayer(playerName)
-      sender ! Json.toJson(gameState.players)
-    }
+    case "onAddPlayer" =>
+      try {
+        onAddPlayer(None)
+        sender ! Json.toJson(gameState.players)
+      } catch {
+        case e: Throwable => sender ! Json.toJson(e.toString)
+      }
+    case ("onAddPlayer", playerName: String) =>
+      try {
+        onAddPlayer(Some(playerName))
+        sender ! Json.toJson(gameState.players)
+      } catch {
+        case e: Throwable => sender ! Json.toJson(e.toString)
+      }
+    case ("onRemovePlayer", playerName: String) =>
+      try {
+        onRemovePlayer(playerName)
+        sender ! Json.toJson(gameState.players)
+      } catch {
+        case e: Throwable => sender ! Json.toJson(e.toString)
+      }
   }
+  // scalastyle:on
 }
