@@ -23,15 +23,13 @@ trait Game extends Resettable {
 object Game {
   val maxPlayerCount = 2
 
-  implicit val gameWrites: Writes[Game] = new Writes[Game] {
-    def writes(game: Game): JsObject = Json.obj(
-      "helpText" -> game.helpText,
-      "players" -> game.players,
-      "questions" -> game.questions,
-      "currentQuestion" -> game.currentQuestion,
-      "currentQuestionTime" -> game.currentQuestionTime
-    )
-  }
+  implicit val gameWrites: Writes[Game] = (game: Game) => Json.obj(
+    "helpText" -> game.helpText,
+    "players" -> game.players,
+    "questions" -> game.questions,
+    "currentQuestion" -> game.currentQuestion,
+    "currentQuestionTime" -> game.currentQuestionTime
+  )
 
   implicit val questionReads: Reads[Game] = (
     (JsPath \ "helpText").read[List[String]] and

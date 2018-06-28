@@ -1,21 +1,28 @@
 package de.htwg.se.learn_duel.model
 
-import de.htwg.se.learn_duel.model.impl.{Player => PlayerImpl}
-import play.api.libs.json._
+import de.htwg.se.learn_duel.model.micro_service_impl.{PlayerHttpServer, Player => PlayerImpl}
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 trait Player {
   val name: String
   var points: Int
   var correctAnswers: List[Question]
   var wrongAnswers: List[Question]
+
   def toString: String
 }
 
 object Player {
+
   val baseName = "Player"
+
   def create(name: String): PlayerImpl = {
-    PlayerImpl(name)
+    print("Running")
+
+    val player = PlayerImpl(name)
+    val playerHttpServer: PlayerHttpServer = new PlayerHttpServer(player)
+    player
   }
 
   implicit val playerWrites: Writes[Player] = new Writes[Player] {
@@ -32,5 +39,5 @@ object Player {
       (JsPath \ "points").read[Int] and
       (JsPath \ "correctAnswers").read[List[Question]] and
       (JsPath \ "wrongAnswers").read[List[Question]]
-  )(PlayerImpl.apply _)
+    ) (PlayerImpl.apply _)
 }
