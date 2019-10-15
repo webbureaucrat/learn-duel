@@ -216,6 +216,19 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
         })
     }
 
+    override def menuToText : String =
+            "\nWelcome to Learn Duel\n" +
+              "Current players: " + this.getPlayerNames.mkString(", ") +
+              "n => new game\n" +
+              "a [name] => add player\n" +
+              "r [name] => remove player\n" +
+              "h => show help\n" +
+              "q => exit\n"
+
+    override def helpToText : String =
+        gameState.helpText.mkString("\n\n")
+
+
     protected def notifyObserversAndSaveUpdate(data: UpdateData): Unit = {
         lastUpdate = data
         notifyObservers(data)

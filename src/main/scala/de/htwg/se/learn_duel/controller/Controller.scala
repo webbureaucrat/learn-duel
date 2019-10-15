@@ -18,6 +18,8 @@ trait Controller extends Observable with Resettable {
     def onStartGame(): Unit
     def onClose(): Unit
     def onAnswerChosen(input: Int)
+    def menuToText : String
+    def helpToText : String
 }
 
 object Controller {
