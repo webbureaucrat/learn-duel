@@ -1,5 +1,6 @@
 package de.htwg.se.learn_duel.controller.impl
 
+import java.security.KeyStore.TrustedCertificateEntry
 import java.util.{Timer, TimerTask}
 
 import com.google.inject.Inject
@@ -227,6 +228,8 @@ class Controller @Inject() (gameState: Game) extends ControllerTrait {
 
     override def helpToText : String =
         gameState.helpText.mkString("\n\n")
+
+    override def getGameState : Game = return gameState
 
 
     protected def notifyObserversAndSaveUpdate(data: UpdateData): Unit = {
